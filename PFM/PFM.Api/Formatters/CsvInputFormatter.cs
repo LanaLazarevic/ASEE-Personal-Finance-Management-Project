@@ -37,9 +37,11 @@ namespace PFM.Api.Formatters
             using var stringReader = new StringReader(csvContent);
             var config = new CsvConfiguration(CultureInfo.InvariantCulture)
             {
+                Delimiter = "\t",
                 HasHeaderRecord = true,
                 BadDataFound = null,
-                MissingFieldFound = null
+                MissingFieldFound = null,
+                HeaderValidated = null    
             };
 
             List<CategoryCsv> records;

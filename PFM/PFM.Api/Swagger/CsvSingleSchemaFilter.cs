@@ -30,9 +30,9 @@ namespace PFM.Api.Swagger
                     mt.Schema = schemaRef;
                     mt.Example = new OpenApiString(
                         @"code,parent-code,name
-                        A,,Misc Expenses
-                        B,,Auto & Transport
-                        C,,Bills & Utilities"
+A,,Misc Expenses
+B,,Auto & Transport
+C,,Bills & Utilities"
                     );
                 }
             }

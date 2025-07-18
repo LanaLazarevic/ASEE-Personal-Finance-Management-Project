@@ -41,6 +41,23 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseExceptionHandler(errApp =>
+{
+    errApp.Run(async ctx =>
+    {
+      
+        ctx.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+        ctx.Response.ContentType = "application/json";
+
+        await ctx.Response.WriteAsJsonAsync(new
+        {
+            message = "The service is not available, please try again later."
+        });
+    });
+});
+
+
+
 app.UseRouting();
 app.UseAuthorization();
 app.MapControllers();

@@ -22,11 +22,16 @@ namespace PFM.Api.Controllers
         [Consumes("text/csv", "application/csv")]
         public async Task<IActionResult> Import([FromBody] ImportCategoriesCommand command)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
 
-            await _mediator.Send(command);
-            return Ok();
+            try
+            {
+                await _mediator.Send(command);
+                return Ok(new { message = "Categories imported." });
+            }
+            catch (ApplicationException appEx)
+            {
+                return StatusCode(503, new { error = appEx.Message });
+            }
         }
     }
 }
