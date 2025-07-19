@@ -24,7 +24,6 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.EnableAnnotations();                         
     c.OperationFilter<PFM.Api.Swagger.CsvSingleSchemaFilter>();
-    // … ostalo …
 });
 
 var app = builder.Build();

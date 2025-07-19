@@ -25,7 +25,7 @@ namespace PFM.Domain.Entities
 
         public string Currency { get; set; }
 
-        public int? Mcc { get; set; }
+        public MccCodeEnum? Mcc { get; set; }
 
         public TransactionKind Kind { get; set; }
 

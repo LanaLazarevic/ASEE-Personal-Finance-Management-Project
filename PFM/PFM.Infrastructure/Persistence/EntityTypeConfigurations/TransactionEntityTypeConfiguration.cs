@@ -50,6 +50,8 @@ namespace PFM.Infrastructure.Persistence.EntityTypeConfigurations
 
           
             builder.Property(t => t.Mcc)
+                   .HasConversion<int>()
+                   .HasColumnType("integer")
                    .IsRequired(false);
 
           
