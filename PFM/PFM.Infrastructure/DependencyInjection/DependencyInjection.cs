@@ -16,6 +16,7 @@ namespace PFM.Infrastructure.DependencyInjection
         {
            
             services.AddScoped<ICategoryRepository, CategoryRepository>();
+            services.AddScoped<ITransactionRepository, TransactionRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 

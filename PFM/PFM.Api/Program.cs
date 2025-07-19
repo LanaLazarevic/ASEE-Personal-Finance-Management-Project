@@ -1,8 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using PFM.Api.Formatters;
+using PFM.Api.Swagger;
+using PFM.Application.UseCases.Catagories.Commands.Import;
+using PFM.Application.UseCases.Transaction.Commands.Import;
 using PFM.Infrastructure.DependencyInjection;
 using PFM.Infrastructure.Persistence.DbContexts;
-using PFM.Application.UseCases.Catagories.Commands.Import;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<PFMDbContext>();
@@ -11,6 +13,8 @@ builder.Services.AddInfrastructureServices();
 builder.Services.AddMediatR(cfg =>
 {
     cfg.RegisterServicesFromAssembly(typeof(ImportCategoriesCommandHandler).Assembly);
+    cfg.RegisterServicesFromAssembly(typeof(ImportTransactionsCommandHandler).Assembly);
+
 
 });
 builder.Services.AddControllers(options =>
@@ -23,7 +27,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.EnableAnnotations();                         
-    c.OperationFilter<PFM.Api.Swagger.CsvSingleSchemaFilter>();
+    c.OperationFilter<CsvSingleSchemaFilter>();
+    c.OperationFilter<CsvTransactionSchemaFilter>();
+
 });
 
 var app = builder.Build();
