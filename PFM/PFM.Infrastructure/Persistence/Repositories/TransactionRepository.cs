@@ -1,6 +1,10 @@
-﻿using PFM.Domain.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using PFM.Domain.Dtos;
+using PFM.Domain.Entities;
 using PFM.Domain.Interfaces;
 using PFM.Infrastructure.Persistence.DbContexts;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,14 +16,50 @@ namespace PFM.Infrastructure.Persistence.Repositories
     public class TransactionRepository : ITransactionRepository
     {
         private readonly PFMDbContext _ctx;
+        private readonly IConfigurationProvider _mapperConfig;
 
-        public TransactionRepository(PFMDbContext ctx)
+        public TransactionRepository(PFMDbContext ctx, IMapper mapper)
         {
             _ctx = ctx;
+            _mapperConfig = mapper.ConfigurationProvider;
         }
         public void Add(Transaction transaction)
         {
             _ctx.Transactions.Add(transaction);
+        }
+
+        public async Task<PagedList<TransactionDto>> GetTransactionsAsync(TransactionQuerySpecification spec)
+        {
+            var query = _ctx.Transactions.AsQueryable();
+
+            if (spec.StartDate.HasValue)
+                query = query.Where(t => t.Date >= spec.StartDate.Value);
+
+            if (spec.EndDate.HasValue)
+                query = query.Where(t => t.Date <= spec.EndDate.Value);
+
+            if (spec.Kind != null)
+                query = query.Where(t => spec.Kind == t.Kind);
+
+            query = spec.SortBy.ToLower() switch
+            {
+                "amount" => spec.SortOrder == SortOrder.Asc
+                    ? query.OrderBy(t => t.Amount)
+                    : query.OrderByDescending(t => t.Amount),
+                _ => spec.SortOrder == SortOrder.Asc
+                    ? query.OrderBy(t => t.Date)
+                    : query.OrderByDescending(t => t.Date)
+            };
+
+            var totalCount = await query.CountAsync();
+
+            var items = await query
+                .Skip((spec.Page - 1) * spec.PageSize)
+                .Take(spec.PageSize)
+                .ProjectTo<TransactionDto>(_mapperConfig)
+                .ToListAsync();
+
+            return new PagedList<TransactionDto>(items, totalCount, spec.Page, spec.PageSize);
         }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using PFM.Application.UseCases.Transaction.Commands.Import;
+using PFM.Application.UseCases.Transaction.Queries.GetAllTransactions;
+using PFM.Domain.Dtos;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace PFM.Api.Controllers
@@ -31,6 +33,13 @@ namespace PFM.Api.Controllers
             {
                 return StatusCode(503, new { error = appEx.Message });
             }
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<GetAllTransactionsResponse>> Get([FromQuery] GetTransactionsQuery query)
+        {
+            var result = await _mediator.Send(query);
+            return Ok(result);
         }
     }
 }

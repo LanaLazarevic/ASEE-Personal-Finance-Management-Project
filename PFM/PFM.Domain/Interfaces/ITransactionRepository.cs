@@ -1,4 +1,5 @@
-﻿using PFM.Domain.Entities;
+﻿using PFM.Domain.Dtos;
+using PFM.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,5 +11,6 @@ namespace PFM.Domain.Interfaces
     public interface ITransactionRepository
     {
         void Add(Transaction transaction);
+        Task<PagedList<TransactionDto>> GetTransactionsAsync(TransactionQuerySpecification specification);
     }
 }

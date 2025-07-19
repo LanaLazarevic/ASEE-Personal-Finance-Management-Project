@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using PFM.Api.Formatters;
 using PFM.Api.Swagger;
+using PFM.Application.Mapping;
 using PFM.Application.UseCases.Catagories.Commands.Import;
 using PFM.Application.UseCases.Transaction.Commands.Import;
 using PFM.Infrastructure.DependencyInjection;
@@ -9,7 +11,10 @@ using PFM.Infrastructure.Persistence.DbContexts;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<PFMDbContext>();
 builder.Services.AddInfrastructureServices();
-
+builder.Services.AddAutoMapper(cfg =>
+{
+    cfg.AddMaps(typeof(TransactionMappingProfile).Assembly);
+});
 builder.Services.AddMediatR(cfg =>
 {
     cfg.RegisterServicesFromAssembly(typeof(ImportCategoriesCommandHandler).Assembly);
