@@ -1,4 +1,7 @@
 ﻿using MediatR;
+using Microsoft.EntityFrameworkCore;
+using Npgsql;
+using PFM.Application.UseCases.Resault;
 using PFM.Domain.Entities;
 using PFM.Domain.Enums;
 using PFM.Domain.Interfaces;
@@ -11,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace PFM.Application.UseCases.Transaction.Commands.Import
 {
-    public class ImportTransactionsCommandHandler : IRequestHandler<ImportTransactionsCommand, bool>
+    public class ImportTransactionsCommandHandler : IRequestHandler<ImportTransactionsCommand, OperationResult>
     {
         private readonly ITransactionRepository _tr;
         private readonly IUnitOfWork _uow;
@@ -23,7 +26,7 @@ namespace PFM.Application.UseCases.Transaction.Commands.Import
         }
 
 
-        public async Task<bool> Handle(ImportTransactionsCommand request, CancellationToken cancellationToken)
+        public async Task<OperationResult> Handle(ImportTransactionsCommand request, CancellationToken cancellationToken)
         {
             var valid = new List<TransactionCsv>();
 
@@ -40,7 +43,7 @@ namespace PFM.Application.UseCases.Transaction.Commands.Import
             }
 
             if (!valid.Any())
-                return false;
+                return OperationResult.Fail("0 valid rows");
 
             try
             {
@@ -73,11 +76,16 @@ namespace PFM.Application.UseCases.Transaction.Commands.Import
                 }
 
                 await _uow.SaveChangesAsync(cancellationToken);
-                return true;
+                return OperationResult.Success();
 
-            } catch (Exception ex) when (ex is Microsoft.EntityFrameworkCore.DbUpdateException || ex is Npgsql.NpgsqlException)
+            }
+            catch (DbUpdateException dbEx)
             {
-                throw new ApplicationException("Database error while importing transactions.");
+                return OperationResult.Fail("Database error while importing categories: " + dbEx.Message);
+            }
+            catch (NpgsqlException npgEx)
+            {
+                return OperationResult.Fail("PostgreSQL error while importing categories: " + npgEx.Message);
             }
 
         }

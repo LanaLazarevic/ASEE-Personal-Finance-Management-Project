@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using PFM.Application.UseCases.Resault;
 using PFM.Domain.Dtos;
 using PFM.Domain.Enums;
 using PFM.Domain.Interfaces;
@@ -10,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace PFM.Application.UseCases.Transaction.Queries.GetAllTransactions
 {
-    public class GetTransactionsQueryHandler : IRequestHandler<GetTransactionsQuery, GetAllTransactionsResponse>
+    public class GetTransactionsQueryHandler : IRequestHandler<GetTransactionsQuery, OperationResult<PagedList<TransactionDto>>>
     {
         private readonly ITransactionRepository _repository;
 
@@ -19,7 +20,7 @@ namespace PFM.Application.UseCases.Transaction.Queries.GetAllTransactions
             _repository = repository;
         }
 
-        public async Task<GetAllTransactionsResponse> Handle(GetTransactionsQuery request, CancellationToken cancellationToken)
+        public async Task<OperationResult<PagedList<TransactionDto>>> Handle(GetTransactionsQuery request, CancellationToken cancellationToken)
         {
             TransactionKind? kindEnum = null;
             if (!string.IsNullOrWhiteSpace(request.Kind))
@@ -35,12 +36,21 @@ namespace PFM.Application.UseCases.Transaction.Queries.GetAllTransactions
                 request.SortBy,
                 request.SortOrder);
 
-            var transactions = await _repository.GetTransactionsAsync(spec);
-            var response = new GetAllTransactionsResponse
+            try
             {
-                Transactions = transactions
-            };
-            return response;
+                var transactions = await _repository.GetTransactionsAsync(spec);
+                return OperationResult<PagedList<TransactionDto>>.Success(transactions);
+            }
+            catch (TimeoutException tex)
+            {
+                return OperationResult<PagedList<TransactionDto>>.Fail(
+                    "Database timeout, please try again later.");
+            }
+            catch (Exception)
+            {
+                return OperationResult<PagedList<TransactionDto>>.Fail(
+                    "Unable to fetch transactions.");
+            }
         }
     }
 }

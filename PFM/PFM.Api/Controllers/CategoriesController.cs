@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using PFM.Api.Models;
 using PFM.Application.UseCases.Catagories.Commands.Import;
 using Swashbuckle.AspNetCore.Annotations;
 using System.ComponentModel.DataAnnotations;
@@ -20,18 +21,22 @@ namespace PFM.Api.Controllers
                   Description = "Imports categories via CSV")]
         [HttpPost("import")]
         [Consumes("text/csv", "application/csv")]
-        public async Task<IActionResult> Import([FromBody] ImportCategoriesCommand command)
+        public async Task<ActionResult<Result>> Import([FromBody] ImportCategoriesCommand command)
         {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState
+                       .Values
+                       .SelectMany(v => v.Errors)
+                       .Select(e => e.ErrorMessage);
+                return BadRequest(Result.BadRequest(string.Join("; ", errors)));
+            }
 
-            try
-            {
-                await _mediator.Send(command);
-                return Ok(new { message = "Categories imported." });
-            }
-            catch (ApplicationException appEx)
-            {
-                return StatusCode(503, new { error = appEx.Message });
-            }
+            var op = await _mediator.Send(command);
+            if (!op.IsSuccess)
+                return StatusCode(503, Result.ServiceUnavailable(op.ErrorMessage));
+
+            return Ok(Result.Ok("Categories imported successfully"));
         }
     }
 }

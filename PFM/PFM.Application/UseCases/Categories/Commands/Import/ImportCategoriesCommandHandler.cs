@@ -4,6 +4,7 @@ using CsvHelper.Configuration;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
+using PFM.Application.UseCases.Resault;
 using PFM.Domain.Entities;
 using PFM.Domain.Interfaces;
 using System;
@@ -14,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace PFM.Application.UseCases.Catagories.Commands.Import
 {
-    public class ImportCategoriesCommandHandler : IRequestHandler<ImportCategoriesCommand, bool>
+    public class ImportCategoriesCommandHandler : IRequestHandler<ImportCategoriesCommand, OperationResult>
     {
         private readonly ICategoryRepository _repo;
         private readonly IUnitOfWork _uow;
@@ -27,7 +28,7 @@ namespace PFM.Application.UseCases.Catagories.Commands.Import
             _uow = uow;
         }
 
-        public async Task<bool> Handle(ImportCategoriesCommand request, CancellationToken ct)
+        public async Task<OperationResult> Handle(ImportCategoriesCommand request, CancellationToken ct)
         {
             var records = request.Records;
 
@@ -37,7 +38,7 @@ namespace PFM.Application.UseCases.Catagories.Commands.Import
                 .ToList();
 
             if (!valid.Any())
-                return false;
+                return OperationResult.Fail("0 valid rows");
 
             try
             {
@@ -88,15 +89,15 @@ namespace PFM.Application.UseCases.Catagories.Commands.Import
                 }
 
                 await _uow.SaveChangesAsync(ct);
-                return true;
+                return OperationResult.Success();
             }
             catch (DbUpdateException dbEx)
             {
-                throw new ApplicationException("Database error while importing categories.");
+                return OperationResult.Fail("Database error while importing categories: " + dbEx.Message);
             }
             catch (NpgsqlException npgEx)
             {
-                throw new ApplicationException("PostgreSQL error while importing categories.");
+                return OperationResult.Fail("PostgreSQL error while importing categories: " + npgEx.Message);
             }
         }
     }

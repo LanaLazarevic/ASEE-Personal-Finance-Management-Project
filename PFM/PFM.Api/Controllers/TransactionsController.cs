@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using PFM.Api.Models;
 using PFM.Application.UseCases.Transaction.Commands.Import;
 using PFM.Application.UseCases.Transaction.Queries.GetAllTransactions;
 using PFM.Domain.Dtos;
@@ -22,24 +23,49 @@ namespace PFM.Api.Controllers
         [SwaggerOperation(OperationId = "Transactions_Import", Summary = "Import transactions", Description = "Imports transactions via CSV")]
         [HttpPost("import")]
         [Consumes("text/csv", "application/csv")]
-        public async Task<IActionResult> Import([FromBody] ImportTransactionsCommand command)
+        public async Task<ActionResult<Result>> Import([FromBody] ImportTransactionsCommand command)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                await _mediator.Send(command);
-                return Ok(new { message = "Transactions imported." });
+                var errors = ModelState
+                       .Values
+                       .SelectMany(v => v.Errors)
+                       .Select(e => e.ErrorMessage);
+                return BadRequest(Result.BadRequest(string.Join("; ", errors)));
             }
-            catch (ApplicationException appEx)
-            {
-                return StatusCode(503, new { error = appEx.Message });
-            }
+            var op = await _mediator.Send(command);
+            if (!op.IsSuccess)
+                return StatusCode(503, Result.ServiceUnavailable(op.ErrorMessage));
+
+            return Ok(Result.Ok("Categories imported successfully"));
         }
 
         [HttpGet]
-        public async Task<ActionResult<GetAllTransactionsResponse>> Get([FromQuery] GetTransactionsQuery query)
+        public async Task<ActionResult<Result<PagedList<TransactionDto>>>> Get([FromQuery] GetTransactionsQuery query)
         {
-            var result = await _mediator.Send(query);
-            return Ok(result);
+
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState
+                    .Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage);
+                return BadRequest(
+                    Result<PagedList<TransactionDto>>.BadRequest(
+                        string.Join("; ", errors)
+                    )
+                );
+            }
+
+            var op = await _mediator.Send(query);
+
+            if (!op.IsSuccess)
+                return StatusCode(
+                    StatusCodes.Status503ServiceUnavailable,
+                    Result<PagedList<TransactionDto>>.ServiceUnavailable(op.ErrorMessage)
+                );
+
+            return Ok(Result<PagedList<TransactionDto>>.Ok(op.Value));
         }
     }
 }

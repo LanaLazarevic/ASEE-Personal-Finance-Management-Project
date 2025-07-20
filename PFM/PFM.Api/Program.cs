@@ -22,10 +22,15 @@ builder.Services.AddMediatR(cfg =>
 
 
 });
-builder.Services.AddControllers(options =>
-{
-    options.InputFormatters.Insert(0, new CsvInputFormatter());
-})
+builder.Services
+    .AddControllers(options =>
+    {
+        options.InputFormatters.Insert(0, new CsvInputFormatter());
+    })
+    .ConfigureApiBehaviorOptions(opts =>
+    {
+        opts.SuppressModelStateInvalidFilter = true;
+    })
     .AddJsonOptions(o => { /* ... */ })
     .AddXmlSerializerFormatters();
 builder.Services.AddEndpointsApiExplorer();
