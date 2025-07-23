@@ -21,7 +21,7 @@ namespace PFM.Api.Swagger
                 }
             };
 
-            foreach (var media in new[] { "text/csv", "application/csv" })
+            foreach (var media in new[] {"application/csv" })
             {
                 if (operation.RequestBody?.Content.TryGetValue(media, out var mt) == true)
                 {

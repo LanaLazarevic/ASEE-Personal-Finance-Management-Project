@@ -10,30 +10,30 @@ namespace PFM.Application.UseCases.Transaction.Commands.Import
     public class TransactionCsv
     {
         [Name("id")]
-        public string Id { get; set; }
+        public string? Id { get; set; }
 
         [Name("beneficiary-name")]
-        public string BeneficiaryName { get; set; }
+        public string? BeneficiaryName { get; set; }
 
         [Name("date")]
-        public string Date { get; set; }
+        public string? Date { get; set; }
 
         [Name("direction")]
-        public string Direction { get; set; }
+        public string? Direction { get; set; }
 
         [Name("amount")]
-        public string Amount { get; set; }
+        public string? Amount { get; set; }
 
         [Name("description")]
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         [Name("currency")]
-        public string Currency { get; set; }
+        public string? Currency { get; set; }
 
         [Name("mcc")]
-        public string Mcc { get; set; }
+        public string? Mcc { get; set; }
 
         [Name("kind")]
-        public string Kind { get; set; }
+        public string? Kind { get; set; }
     }
 }

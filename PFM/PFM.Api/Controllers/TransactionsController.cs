@@ -1,10 +1,11 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using PFM.Api.Models;
+using PFM.Application.UseCases.Result;
 using PFM.Application.UseCases.Transaction.Commands.Import;
 using PFM.Application.UseCases.Transaction.Queries.GetAllTransactions;
 using PFM.Domain.Dtos;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Text.Json;
 
 namespace PFM.Api.Controllers
 {
@@ -22,50 +23,119 @@ namespace PFM.Api.Controllers
 
         [SwaggerOperation(OperationId = "Transactions_Import", Summary = "Import transactions", Description = "Imports transactions via CSV")]
         [HttpPost("import")]
-        [Consumes("text/csv", "application/csv")]
-        public async Task<ActionResult<Result>> Import([FromBody] ImportTransactionsCommand command)
+        [Consumes("application/csv")]
+        public async Task<IActionResult> Import([FromBody] ImportTransactionsCommand command)
         {
             if (!ModelState.IsValid)
             {
-                var errors = ModelState
-                       .Values
-                       .SelectMany(v => v.Errors)
-                       .Select(e => e.ErrorMessage);
-                return BadRequest(Result.BadRequest(string.Join("; ", errors)));
+                
+                    var errors = ModelState
+                       .SelectMany(kvp => kvp.Value.Errors
+                       .Select(err =>
+                       {
+                           var raw = err.ErrorMessage ?? "";
+                           var idx = raw.IndexOf(':');
+                           var code = idx > 0 ? raw.Substring(0, idx) : "invalid-format";
+                           var message = idx > 0 ? raw.Substring(idx + 1) : raw;
+                           return new ValidationError
+                           {
+                               Tag = kvp.Key,
+                               Error = code,
+                               Message = message
+                           };
+                       }))
+                       .ToList();
+
+                    return BadRequest(errors);
+                
             }
             var op = await _mediator.Send(command);
             if (!op.IsSuccess)
-                return StatusCode(503, Result.ServiceUnavailable(op.ErrorMessage));
+            {
+                object? errors = null;
+                if (op.code == 400)
+                {
+                    errors = op.Error!
+                    .OfType<ValidationError>()
+                    .Select(e => new
+                    {
+                        tag = e.Tag,
+                        error = e.Error,
+                        message = e.Message
+                    })
+                    .ToList();
+                }
 
-            return Ok(Result.Ok("Categories imported successfully"));
+
+                return StatusCode(op.code, new { errors });
+            }
+
+            return Ok("Transactions imported successfully");
         }
 
         [HttpGet]
-        public async Task<ActionResult<Result<PagedList<TransactionDto>>>> Get([FromQuery] GetTransactionsQuery query)
+        public async Task<IActionResult> Get([FromQuery] GetTransactionsQuery query)
         {
-
+            //invalid format uhvatiti u validatoru
             if (!ModelState.IsValid)
             {
-                var errors = ModelState
-                    .Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage);
-                return BadRequest(
-                    Result<PagedList<TransactionDto>>.BadRequest(
-                        string.Join("; ", errors)
-                    )
-                );
-            }
+               
+                   var errors = ModelState
+                        .SelectMany(kvp => kvp.Value.Errors
+                        .Select(err =>
+                        {
+                            var raw = err.ErrorMessage ?? "";
+                            var idx = raw.IndexOf(':');
+                            var code = idx > 0 ? raw[..idx] : "invalid-format";
+                            var message = idx > 0 ? raw[(idx + 1)..] : raw;
+                            return new ValidationError
+                            {
+                                Tag = kvp.Key,
+                                Error = code,
+                                Message = message
+                            };
+                        }))
+                        .ToList();
 
+                   return BadRequest(errors);
+               
+            }
             var op = await _mediator.Send(query);
 
             if (!op.IsSuccess)
-                return StatusCode(
-                    StatusCodes.Status503ServiceUnavailable,
-                    Result<PagedList<TransactionDto>>.ServiceUnavailable(op.ErrorMessage)
-                );
+            {
+                object? errors = null;
+                if (op.code == 400)
+                {
+                    errors = op.Error!
+                    .OfType<ValidationError>()
+                    .Select(e => new
+                    {
+                        tag = e.Tag,
+                        error = e.Error,
+                        message = e.Message
+                    })
+                    .ToList();
+                    return StatusCode(op.code, new { errors });
+                }
+                else if (op.code == 503)
+                {
+                    errors = op.Error!
+                    .OfType<ServerError>()
+                    .Select(e => new
+                    {
+                        message = e.Message
+                    })
+                    .ToList();
+                    return StatusCode(op.code, errors );
+                }
 
-            return Ok(Result<PagedList<TransactionDto>>.Ok(op.Value));
+
+                return StatusCode(op.code, new { errors });
+            }
+                
+
+            return Ok(op.Value);
         }
     }
 }

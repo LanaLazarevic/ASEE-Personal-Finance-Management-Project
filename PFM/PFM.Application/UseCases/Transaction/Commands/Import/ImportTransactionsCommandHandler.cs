@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using PFM.Application.UseCases.Resault;
+using PFM.Application.UseCases.Result;
+using PFM.Domain.Dtos;
 using PFM.Domain.Entities;
 using PFM.Domain.Enums;
 using PFM.Domain.Interfaces;
@@ -16,13 +18,12 @@ namespace PFM.Application.UseCases.Transaction.Commands.Import
 {
     public class ImportTransactionsCommandHandler : IRequestHandler<ImportTransactionsCommand, OperationResult>
     {
-        private readonly ITransactionRepository _tr;
         private readonly IUnitOfWork _uow;
-
-        public ImportTransactionsCommandHandler(ITransactionRepository tr, IUnitOfWork uow)
+        private readonly ITransactionImportLogger _logger;
+        public ImportTransactionsCommandHandler(IUnitOfWork uow, ITransactionImportLogger logger)
         {
-            _tr = tr;
             _uow = uow;
+            _logger = logger;
         }
 
 
@@ -42,13 +43,23 @@ namespace PFM.Application.UseCases.Transaction.Commands.Import
                 valid.Add(r);
             }
 
-            if (!valid.Any())
-                return OperationResult.Fail("0 valid rows");
+            //if (!valid.Any())
+
+            var allIds = valid.Select(r => r.Id).Distinct().ToList();
+            var existingIds = await _uow.Transactions.GetExistingIdsAsync(allIds, cancellationToken);
+
+            var skippedIds = new List<string>();
 
             try
             {
                 foreach (var row in valid)
                 {
+                    if (existingIds.Contains(row.Id))
+                    {
+                        skippedIds.Add(row.Id);
+                        continue;
+                    }
+
                     var parsed = DateTime.ParseExact(row.Date.Trim(), "M/d/yyyy", CultureInfo.InvariantCulture);
                     var date = DateTime.SpecifyKind(parsed, DateTimeKind.Utc);
                     var amount = double.Parse(row.Amount.Replace("€", string.Empty).Trim(), NumberStyles.Any, CultureInfo.InvariantCulture);
@@ -72,20 +83,33 @@ namespace PFM.Application.UseCases.Transaction.Commands.Import
                         Kind = kind
                     };
 
-                    _tr.Add(tx);
+                    _uow.Transactions.Add(tx);
                 }
 
                 await _uow.SaveChangesAsync(cancellationToken);
+                await _logger.LogSkippedAsync(skippedIds, cancellationToken);
                 return OperationResult.Success();
 
             }
             catch (DbUpdateException dbEx)
             {
-                return OperationResult.Fail("Database error while importing categories: " + dbEx.Message);
+                var error = "Database error while importing transactions: " + dbEx.Message;
+                var problem = new ServerError()
+                {
+                    Message = error
+                };
+                List<ServerError> problems = new List<ServerError> { problem };
+                return OperationResult.Fail(503, problems);
             }
             catch (NpgsqlException npgEx)
             {
-                return OperationResult.Fail("PostgreSQL error while importing categories: " + npgEx.Message);
+                var error = "PostgreSQL error while importing transactions: " + npgEx.Message;
+                var problem = new ServerError()
+                {
+                    Message = error
+                };
+                List<ServerError> problems = new List<ServerError> { problem };
+                return OperationResult.Fail(503, problems);
             }
 
         }

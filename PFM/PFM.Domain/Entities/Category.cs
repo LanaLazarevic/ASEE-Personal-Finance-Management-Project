@@ -15,7 +15,7 @@ namespace PFM.Domain.Entities
 
         public string Name { get; set; }
 
-        public string ParentCode { get; set; }
+        public string? ParentCode { get; set; }
 
         public Category? Parent { get; set; }
 

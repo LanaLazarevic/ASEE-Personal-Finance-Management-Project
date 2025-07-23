@@ -9,6 +9,6 @@ namespace PFM.Application.UseCases.Transaction.Queries.GetAllTransactions
 {
     public class GetAllTransactionsResponse
     {
-        public PagedList<TransactionDto> Transactions { get; set; }
+        public required PagedList<TransactionDto> Transactions { get; set; }
     }
 }

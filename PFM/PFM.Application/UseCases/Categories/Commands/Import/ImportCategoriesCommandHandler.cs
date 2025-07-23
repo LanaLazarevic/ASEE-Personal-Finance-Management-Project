@@ -5,6 +5,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using PFM.Application.UseCases.Resault;
+using PFM.Application.UseCases.Result;
 using PFM.Domain.Entities;
 using PFM.Domain.Interfaces;
 using System;
@@ -17,14 +18,11 @@ namespace PFM.Application.UseCases.Catagories.Commands.Import
 {
     public class ImportCategoriesCommandHandler : IRequestHandler<ImportCategoriesCommand, OperationResult>
     {
-        private readonly ICategoryRepository _repo;
         private readonly IUnitOfWork _uow;
 
         public ImportCategoriesCommandHandler(
-            ICategoryRepository repo,
             IUnitOfWork uow)
         {
-            _repo = repo;
             _uow = uow;
         }
 
@@ -37,8 +35,8 @@ namespace PFM.Application.UseCases.Catagories.Commands.Import
                          && !string.IsNullOrWhiteSpace(r.Name))
                 .ToList();
 
-            if (!valid.Any())
-                return OperationResult.Fail("0 valid rows");
+            //if (!valid.Any())
+                
 
             try
             {
@@ -48,7 +46,7 @@ namespace PFM.Application.UseCases.Catagories.Commands.Import
                     .Where(pc => !string.IsNullOrWhiteSpace(pc))
                     .Distinct();
 
-                var existing = await _repo.GetByCodesAsync(codes.Concat(parentCodes), ct);
+                var existing = await _uow.Categories.GetByCodesAsync(codes.Concat(parentCodes), ct);
                 var dict = existing
                     .Where(c => codes.Contains(c.Code))
                     .ToDictionary(c => c.Code);
@@ -62,7 +60,7 @@ namespace PFM.Application.UseCases.Catagories.Commands.Import
                             Code = row.Code,
                             Name = row.Name
                         };
-                        _repo.Add(cat);
+                        _uow.Categories.Add(cat);
                         dict.Add(cat.Code, cat);
                     }
                 }
@@ -93,11 +91,23 @@ namespace PFM.Application.UseCases.Catagories.Commands.Import
             }
             catch (DbUpdateException dbEx)
             {
-                return OperationResult.Fail("Database error while importing categories: " + dbEx.Message);
+                var error = "Database error while importing categories: " + dbEx.Message;
+                var problem = new ServerError()
+                {
+                    Message = error
+                };
+                List<ServerError> problems = new List<ServerError> { problem };
+                return OperationResult.Fail(503, problems);
             }
             catch (NpgsqlException npgEx)
             {
-                return OperationResult.Fail("PostgreSQL error while importing categories: " + npgEx.Message);
+                var error = "PostgreSQL error while importing categories: " + npgEx.Message;
+                var problem = new ServerError()
+                {
+                    Message = error
+                };
+                List<ServerError> problems = new List<ServerError> { problem };
+                return OperationResult.Fail(503, problems);
             }
         }
     }

@@ -1,0 +1,53 @@
+﻿using FluentValidation;
+using PFM.Application.UseCases.Transaction.Queries.GetAllTransactions;
+using PFM.Domain.Dtos;
+using PFM.Domain.Enums;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace PFM.Application.Validation
+{
+    public class GetTransactionsQueryValidator : AbstractValidator<GetTransactionsQuery>
+    {
+        public GetTransactionsQueryValidator()
+        {
+            ClassLevelCascadeMode = CascadeMode.Continue;
+            RuleLevelCascadeMode = CascadeMode.Continue;
+
+
+            RuleFor(x => x.Kind)
+                .Must(k => string.IsNullOrWhiteSpace(k)
+                           || Enum.TryParse<TransactionKind>(k, true, out _))
+                .WithMessage(ctx => {
+                    var names = string.Join(", ", Enum.GetNames(typeof(TransactionKind)));
+                    return $"transaction-kind:unknown-enum:Kind must be one of: {names}";
+                });
+
+            RuleFor(x => x.EndDate)
+                .Must((q, end) =>
+                    !end.HasValue
+                    || !q.StartDate.HasValue
+                    || end.Value.Date >= q.StartDate.Value.Date)
+                .WithMessage("end-date:combination-required:EndDate must be the same or after StartDate");
+
+            RuleFor(x => x.Page)
+                .GreaterThanOrEqualTo(1)
+                .WithMessage("page:out-of-range:Page must be at least 1");
+
+            RuleFor(x => x.PageSize)
+                .InclusiveBetween(1, 1000)
+                .WithMessage("page-size:out-of-range:PageSize must be between 1 and 1000");
+
+            RuleFor(q => q.SortOrder)
+            .Must(s => Enum.TryParse<SortOrder>(s, true, out _))
+            .WithErrorCode("sort-order:unknown-enum")
+            .WithMessage(ctx => {
+                var names = string.Join(", ", Enum.GetNames(typeof(SortOrder)));
+                return $"SortOrder must be one of: {names}";
+            });
+        }
+    }
+}

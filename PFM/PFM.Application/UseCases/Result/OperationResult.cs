@@ -1,8 +1,10 @@
 ﻿using MediatR;
+using PFM.Application.UseCases.Result;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace PFM.Application.UseCases.Resault
@@ -11,32 +13,34 @@ namespace PFM.Application.UseCases.Resault
     {
         public bool IsSuccess { get; }
         public T? Value { get; }
-        public string? ErrorMessage { get; }
+        public IEnumerable<Error>? Error { get; }
+        public int code { get; }
 
-        internal OperationResult(bool success, T? value, string? error)
+        internal OperationResult(bool success, T? value, int code, IEnumerable<Error>? erorrs)
         {
             IsSuccess = success;
             Value = value;
-            ErrorMessage = error;
+            this.code = code;
+            this.Error = erorrs;
         }
 
 
-        public static OperationResult<T> Success(T value)
-            => new(true, value, null);
+        public static OperationResult<T> Success(T value, int code)
+            => new(true, value, code, default);
 
-        public static OperationResult<T> Fail(string errorMessage)
-            => new(false, default, errorMessage);
+        public static OperationResult<T> Fail( int code, IEnumerable<Error> error)
+            => new(false, default, code, error);
     }
 
     public class OperationResult : OperationResult<Unit>
     {
-        private OperationResult(bool success, Unit? value, string? error)
-            : base(success, value: (Unit)value, error) { }
+        private OperationResult(bool success, Unit? value, int code, IEnumerable<Error>? errors)
+            : base(success, value: (Unit)value, code, errors) { }
 
         public static OperationResult Success()
-            => new(true, Unit.Value, null);
+            => new(true, Unit.Value, 200, default);
 
-        public static OperationResult Fail(string errorMessage)
-            => new(false, Unit.Value, errorMessage);
+        public static OperationResult Fail(int code, IEnumerable<Error> errors)
+            => new(false, Unit.Value, code, errors);
     }
 }

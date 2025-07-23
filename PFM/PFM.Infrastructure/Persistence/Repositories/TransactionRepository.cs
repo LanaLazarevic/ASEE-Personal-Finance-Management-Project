@@ -59,7 +59,28 @@ namespace PFM.Infrastructure.Persistence.Repositories
                 .ProjectTo<TransactionDto>(_mapperConfig)
                 .ToListAsync();
 
-            return new PagedList<TransactionDto>(items, totalCount, spec.Page, spec.PageSize);
+            return new PagedList<TransactionDto>()
+            {
+                Items = items,
+                TotalCount = totalCount,
+                PageSize = spec.PageSize,
+                Page = spec.Page,
+                SortBy = spec.SortBy,
+                SortOrderd = spec.SortOrder.ToString(),
+                TotalPages = (int)Math.Ceiling((double)totalCount / spec.PageSize)
+            };
+        }
+
+        public async Task<bool> ExistsAsync(string id, CancellationToken ct = default)
+        {
+            return await _ctx.Transactions.AnyAsync(t => t.Id == id, ct);
+        }
+        public async Task<List<string>> GetExistingIdsAsync(List<string> ids, CancellationToken ct = default)
+        {
+            return await _ctx.Transactions
+                        .Where(t => ids.Contains(t.Id))
+                        .Select(t => t.Id)
+                        .ToListAsync(ct);
         }
     }
 }

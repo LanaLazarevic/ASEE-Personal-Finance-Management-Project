@@ -1,9 +1,13 @@
-﻿using MediatR;
+﻿using CsvHelper;
+using CsvHelper.Configuration;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using PFM.Api.Models;
 using PFM.Application.UseCases.Catagories.Commands.Import;
+using PFM.Application.UseCases.Result;
+using PFM.Application.UseCases.Transaction.Commands.Import;
 using Swashbuckle.AspNetCore.Annotations;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 
 namespace PFM.Api.Controllers
 {
@@ -20,23 +24,58 @@ namespace PFM.Api.Controllers
                   Summary = "Import categories",
                   Description = "Imports categories via CSV")]
         [HttpPost("import")]
-        [Consumes("text/csv", "application/csv")]
-        public async Task<ActionResult<Result>> Import([FromBody] ImportCategoriesCommand command)
+        [Consumes("application/csv")]
+        public async Task<IActionResult> Import([FromBody] ImportCategoriesCommand cmd)
         {
+
             if (!ModelState.IsValid)
             {
-                var errors = ModelState
-                       .Values
-                       .SelectMany(v => v.Errors)
-                       .Select(e => e.ErrorMessage);
-                return BadRequest(Result.BadRequest(string.Join("; ", errors)));
+                if (!ModelState.IsValid)
+                {
+                    var errors = ModelState
+                       .SelectMany(kvp => kvp.Value.Errors
+                       .Select(err =>
+                       {
+                           var raw = err.ErrorMessage ?? "";
+                           var idx = raw.IndexOf(':');
+                           var code = idx > 0 ? raw.Substring(0, idx) : "invalid-format";
+                           var message = idx > 0 ? raw.Substring(idx + 1) : raw;
+                           return new ValidationError
+                           {
+                               Tag = kvp.Key,
+                               Error = code,
+                               Message = message
+                           };
+                       }))
+                       .ToList();
+
+                    return BadRequest(errors);
+                }
+
             }
 
-            var op = await _mediator.Send(command);
+            var op = await _mediator.Send(cmd);
             if (!op.IsSuccess)
-                return StatusCode(503, Result.ServiceUnavailable(op.ErrorMessage));
+            {
+                object? errors = null;
+                if (op.code == 400)
+                {
+                    errors = op.Error!
+                    .OfType<ValidationError>()
+                    .Select(e => new
+                    {
+                        tag = e.Tag,
+                        error = e.Error,
+                        message = e.Message
+                    })
+                    .ToList();
+                }
 
-            return Ok(Result.Ok("Categories imported successfully"));
+
+                return StatusCode(op.code, new { errors });
+            }
+
+            return Ok("Categories imported successfully");
         }
     }
 }
