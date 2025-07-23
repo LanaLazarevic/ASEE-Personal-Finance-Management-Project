@@ -19,8 +19,11 @@ namespace PFM.Domain.Entities
 
         public Category? Parent { get; set; }
 
-        public List<Category> Children { get; set; } = [];
+        public List<Category>? Children { get; set; } = [];
 
-        public List<Transaction> Transactions { get; set; } = [];
+        public List<Transaction>? Transactions { get; set; } = [];
+
+        public List<Split>? Splits { get; set; } = [];
+
     }
 }

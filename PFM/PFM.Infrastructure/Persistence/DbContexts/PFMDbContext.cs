@@ -20,6 +20,8 @@ namespace PFM.Infrastructure.Persistence.DbContexts
         public DbSet<Transaction> Transactions { get; set; }
         public DbSet<Category> Categories { get; set; }
 
+        public DbSet<Split> Splits { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
@@ -43,6 +45,7 @@ namespace PFM.Infrastructure.Persistence.DbContexts
             modelBuilder.HasDefaultSchema("PFM");
             modelBuilder.ApplyConfiguration(new CategoryEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new TransactionEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new SplitEntityTypeConfiguration());
         }
         
      

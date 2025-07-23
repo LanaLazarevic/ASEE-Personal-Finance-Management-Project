@@ -32,5 +32,7 @@ namespace PFM.Domain.Entities
         public string? CatCode { get; set; }
 
         public Category? Category { get; set; }
+
+        public List<Split>? Splits { get; set; } = [];
     }
 }
