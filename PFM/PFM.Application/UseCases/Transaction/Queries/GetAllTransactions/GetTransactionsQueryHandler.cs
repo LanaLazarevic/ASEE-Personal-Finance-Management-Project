@@ -37,14 +37,14 @@ namespace PFM.Application.UseCases.Transaction.Queries.GetAllTransactions
                 {
                     var raw = error.ErrorMessage ?? "";
 
-                    var split = raw.Split(new[] { ':' }, 3);
+                    var split = raw.Split([':'], 3);
 
                     var tag = split[0].Trim();
                     var code = split[1].Trim();
                     var message = split[2].Trim();
                     var newError = new ValidationError
                     {
-                        Tag = error.PropertyName,
+                        Tag = tag,
                         Error = code,
                         Message = message
                     };

@@ -10,7 +10,6 @@ namespace PFM.Application.UseCases.Result
     
     [JsonDerivedType(typeof(ValidationError), nameof(ValidationError))]
     [JsonDerivedType(typeof(ServerError), nameof(ServerError))]
-
     public abstract class Error
     {
     }

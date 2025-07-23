@@ -23,7 +23,7 @@ namespace PFM.Application.Validation
                            || Enum.TryParse<TransactionKind>(k, true, out _))
                 .WithMessage(ctx => {
                     var names = string.Join(", ", Enum.GetNames(typeof(TransactionKind)));
-                    return $"transaction-kind:unknown-enum:Kind must be one of: {names}";
+                    return $"transaction-kind:unknown-enum:transaction-kind must be one of: {names}";
                 });
 
             RuleFor(x => x.EndDate)
@@ -31,22 +31,22 @@ namespace PFM.Application.Validation
                     !end.HasValue
                     || !q.StartDate.HasValue
                     || end.Value.Date >= q.StartDate.Value.Date)
-                .WithMessage("end-date:combination-required:EndDate must be the same or after StartDate");
+                .WithMessage("end-date:combination-required:end-date must be the same or after StartDate");
 
             RuleFor(x => x.Page)
                 .GreaterThanOrEqualTo(1)
-                .WithMessage("page:out-of-range:Page must be at least 1");
+                .WithMessage("page:out-of-range:page must be at least 1");
 
             RuleFor(x => x.PageSize)
                 .InclusiveBetween(1, 1000)
-                .WithMessage("page-size:out-of-range:PageSize must be between 1 and 1000");
+                .WithMessage("page-size:out-of-range:page-size must be between 1 and 1000");
 
             RuleFor(q => q.SortOrder)
             .Must(s => Enum.TryParse<SortOrder>(s, true, out _))
             .WithErrorCode("sort-order:unknown-enum")
             .WithMessage(ctx => {
                 var names = string.Join(", ", Enum.GetNames(typeof(SortOrder)));
-                return $"SortOrder must be one of: {names}";
+                return $"sort-order must be one of: {names}";
             });
         }
     }
