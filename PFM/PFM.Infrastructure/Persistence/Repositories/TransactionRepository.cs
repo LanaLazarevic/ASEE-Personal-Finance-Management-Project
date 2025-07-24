@@ -38,8 +38,8 @@ namespace PFM.Infrastructure.Persistence.Repositories
             if (spec.EndDate.HasValue)
                 query = query.Where(t => t.Date <= spec.EndDate.Value);
 
-            if (spec.Kind != null)
-                query = query.Where(t => spec.Kind == t.Kind);
+            if (spec.Kind != null && spec.Kind.Any())
+                query = query.Where(t => spec.Kind.Contains(t.Kind));
 
             query = spec.SortBy.ToLower() switch
             {

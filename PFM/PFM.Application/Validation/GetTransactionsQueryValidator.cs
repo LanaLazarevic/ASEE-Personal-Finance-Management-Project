@@ -19,12 +19,11 @@ namespace PFM.Application.Validation
 
 
             RuleFor(x => x.Kind)
-                .Must(k => string.IsNullOrWhiteSpace(k)
-                           || Enum.TryParse<TransactionKind>(k, true, out _))
-                .WithMessage(ctx => {
-                    var names = string.Join(", ", Enum.GetNames(typeof(TransactionKind)));
-                    return $"transaction-kind:unknown-enum:transaction-kind must be one of: {names}";
-                });
+             .Must(list => list == null || list.All(k => Enum.TryParse<TransactionKind>(k.Trim(), true, out _)))
+             .WithMessage(ctx => {
+                 var names = string.Join(", ", Enum.GetNames(typeof(TransactionKind)));
+                 return $"transaction-kind:unknown-enum:transaction-kind must be one of: {names}";
+             });
 
             RuleFor(x => x.EndDate)
                 .Must((q, end) =>

@@ -17,7 +17,7 @@ namespace PFM.Domain.Dtos
     {
         public DateTime? StartDate { get; }
         public DateTime? EndDate { get; }
-        public TransactionKind? Kind { get; }
+        public IEnumerable<TransactionKind>? Kind { get; }
         public int Page { get; }
         public int PageSize { get; }
         public string SortBy { get; }
@@ -26,7 +26,7 @@ namespace PFM.Domain.Dtos
         public TransactionQuerySpecification(
             DateTime? startDate,
             DateTime? endDate,
-            TransactionKind? kind,
+            IEnumerable<TransactionKind>? kind,
             int page,
             int pageSize,
             string sortBy,

@@ -17,7 +17,7 @@ namespace PFM.Application.UseCases.Transaction.Queries.GetAllTransactions
     public class GetTransactionsQuery : IRequest<OperationResult<PagedList<TransactionDto>>>
     {
         [FromQuery(Name ="transaction-kind")]
-        public string? Kind { get; set; }
+        public IEnumerable<string>? Kind { get; set; }
 
         [FromQuery(Name = "start-date")]
         public DateTime? StartDate { get; set; }

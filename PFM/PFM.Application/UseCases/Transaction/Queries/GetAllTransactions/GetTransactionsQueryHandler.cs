@@ -53,16 +53,33 @@ namespace PFM.Application.UseCases.Transaction.Queries.GetAllTransactions
                
                 return OperationResult<PagedList<TransactionDto>>.Fail(400, validationerrors);
             }
-            TransactionKind? kindEnum = null;
-            if (!string.IsNullOrWhiteSpace(request.Kind))
-                kindEnum = Enum.Parse<TransactionKind>(request.Kind, true);
+            
+            List<TransactionKind>? kindsEnum = null;
+            if (request.Kind != null && request.Kind.Any())
+            {
+                var parsed = new List<TransactionKind>();
+                foreach (var kindParam in request.Kind)
+                {
+                    var parts = kindParam
+                        .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                    foreach (var part in parts)
+                    {
+                        if (Enum.TryParse<TransactionKind>(part, true, out var val))
+                        {
+                            parsed.Add(val);
+                        }
+                    }
+                }
+                if (parsed.Any())
+                    kindsEnum = parsed.Distinct().ToList();
+            }
 
             var sortEnum = Enum.Parse<SortOrder>(request.SortOrder, true);
 
             var spec = new TransactionQuerySpecification(
                 request.StartDate,
                 request.EndDate,
-                kindEnum,
+                kindsEnum,
                 request.Page,
                 request.PageSize,
                 request.SortBy,
