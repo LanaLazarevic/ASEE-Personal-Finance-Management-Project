@@ -14,5 +14,6 @@ namespace PFM.Domain.Interfaces
         Task<PagedList<TransactionDto>> GetTransactionsAsync(TransactionQuerySpecification specification);
         Task<bool> ExistsAsync(string id, CancellationToken ct = default);
         Task<List<string>> GetExistingIdsAsync(List<string> ids, CancellationToken ct = default);
+        Task<Transaction?> GetByIdAsync(string id, CancellationToken ct = default);
     }
 }

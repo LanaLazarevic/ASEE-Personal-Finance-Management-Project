@@ -82,5 +82,12 @@ namespace PFM.Infrastructure.Persistence.Repositories
                         .Select(t => t.Id)
                         .ToListAsync(ct);
         }
+
+        public async Task<Transaction?> GetByIdAsync(string id, CancellationToken ct = default)
+        {
+            return await _ctx.Transactions
+                         .Include(t => t.Category)
+                         .FirstOrDefaultAsync(t => t.Id == id, ct);
+        }
     }
 }

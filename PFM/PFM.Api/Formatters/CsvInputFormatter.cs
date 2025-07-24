@@ -86,7 +86,7 @@ namespace PFM.Api.Formatters
             }
             catch (Exception ex)
             {
-
+                // ne sve exeptione nego samo da vidim dal je nevalidan parametar
                 context.ModelState.TryAddModelError(
                     context.ModelName,
                     "Invalid CSV format: " + ex.Message);

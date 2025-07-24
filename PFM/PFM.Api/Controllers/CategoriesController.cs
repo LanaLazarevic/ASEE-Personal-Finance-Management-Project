@@ -69,6 +69,18 @@ namespace PFM.Api.Controllers
                         message = e.Message
                     })
                     .ToList();
+                    return StatusCode(op.code, new { errors });
+                }
+                else if (op.code == 503)
+                {
+                    errors = op.Error!
+                    .OfType<ServerError>()
+                    .Select(e => new
+                    {
+                        message = e.Message
+                    })
+                    .ToList();
+                    return StatusCode(op.code, errors);
                 }
 
 
