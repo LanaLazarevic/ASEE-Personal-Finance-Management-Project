@@ -30,6 +30,9 @@ namespace PFM.Domain.Dtos
         public string Kind { get; set; }
         [JsonPropertyName("cat-code")]
         public string? CatCode { get; set; }
+
+        [JsonPropertyName("splits")]
+        public List<SplitItemDto>? Splits { get; set; }
     }
 
    
