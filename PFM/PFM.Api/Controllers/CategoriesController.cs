@@ -30,8 +30,7 @@ namespace PFM.Api.Controllers
 
             if (!ModelState.IsValid)
             {
-                if (!ModelState.IsValid)
-                {
+                
                     var errors = ModelState
                        .SelectMany(kvp => kvp.Value.Errors
                        .Select(err =>
@@ -50,7 +49,6 @@ namespace PFM.Api.Controllers
                        .ToList();
 
                     return BadRequest(errors);
-                }
 
             }
 

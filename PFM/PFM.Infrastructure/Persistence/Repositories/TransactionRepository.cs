@@ -89,5 +89,25 @@ namespace PFM.Infrastructure.Persistence.Repositories
                          .Include(t => t.Category)
                          .FirstOrDefaultAsync(t => t.Id == id, ct);
         }
+
+        public async Task<List<Transaction>> GetForAnalyticsAsync(AnalyticsTransactionQuerySpecification spec, CancellationToken ct = default)
+        {
+            var q = _ctx.Transactions
+                        .Include(t => t.Category)
+                        .Include(t => t.Splits!)
+                           .ThenInclude(s => s.Category)
+                        .AsQueryable();
+
+            if (spec.StartDate.HasValue)
+                q = q.Where(t => t.Date >= spec.StartDate.Value.Date);
+
+            if (spec.EndDate.HasValue)
+                q = q.Where(t => t.Date <= spec.EndDate.Value.Date);
+
+            if (spec.Direction.HasValue)
+                q = q.Where(t => t.Direction == spec.Direction.Value);
+
+            return await q.ToListAsync(ct);
+        }
     }
 }

@@ -15,5 +15,6 @@ namespace PFM.Domain.Interfaces
         Task<bool> ExistsAsync(string id, CancellationToken ct = default);
         Task<List<string>> GetExistingIdsAsync(List<string> ids, CancellationToken ct = default);
         Task<Transaction?> GetByIdAsync(string id, CancellationToken ct = default);
+        Task<List<Transaction>> GetForAnalyticsAsync(AnalyticsTransactionQuerySpecification spec, CancellationToken ct = default);
     }
 }

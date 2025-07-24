@@ -76,9 +76,16 @@ namespace PFM.Application.UseCases.Transaction.Queries.GetAllTransactions
 
             var sortEnum = Enum.Parse<SortOrder>(request.SortOrder, true);
 
+            DateTime? startUtc = request.StartDate.HasValue
+                        ? DateTime.SpecifyKind(request.StartDate.Value, DateTimeKind.Utc)
+                        : (DateTime?)null;
+            DateTime? endUtc = request.EndDate.HasValue
+                        ? DateTime.SpecifyKind(request.EndDate.Value, DateTimeKind.Utc)
+                        : (DateTime?)null;
+
             var spec = new TransactionQuerySpecification(
-                request.StartDate,
-                request.EndDate,
+                startUtc,
+                endUtc,
                 kindsEnum,
                 request.Page,
                 request.PageSize,

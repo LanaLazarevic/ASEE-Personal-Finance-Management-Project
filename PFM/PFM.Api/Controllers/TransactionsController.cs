@@ -13,7 +13,7 @@ namespace PFM.Api.Controllers
 {
     [Route("transactions")]
     [ApiController]
-    public class TransactionsController : Controller
+    public class TransactionsController : ControllerBase
     {
 
         private readonly IMediator _mediator;

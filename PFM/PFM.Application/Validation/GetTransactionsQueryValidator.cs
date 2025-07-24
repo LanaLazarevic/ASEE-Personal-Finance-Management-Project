@@ -30,7 +30,7 @@ namespace PFM.Application.Validation
                     !end.HasValue
                     || !q.StartDate.HasValue
                     || end.Value.Date >= q.StartDate.Value.Date)
-                .WithMessage("end-date:combination-required:end-date must be the same or after StartDate");
+                .WithMessage("end-date:combination-required:end-date must be the same or after start-date");
 
             RuleFor(x => x.Page)
                 .GreaterThanOrEqualTo(1)
@@ -42,10 +42,9 @@ namespace PFM.Application.Validation
 
             RuleFor(q => q.SortOrder)
             .Must(s => Enum.TryParse<SortOrder>(s, true, out _))
-            .WithErrorCode("sort-order:unknown-enum")
             .WithMessage(ctx => {
                 var names = string.Join(", ", Enum.GetNames(typeof(SortOrder)));
-                return $"sort-order must be one of: {names}";
+                return $"sort-order:unknown-enum:sort-order must be one of: {names}";
             });
         }
     }
