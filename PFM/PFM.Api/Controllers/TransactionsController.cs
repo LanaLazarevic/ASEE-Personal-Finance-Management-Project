@@ -4,6 +4,7 @@ using Org.BouncyCastle.Ocsp;
 using PFM.Api.Request;
 using PFM.Api.Validation;
 using PFM.Application.UseCases.Result;
+using PFM.Application.UseCases.Transaction.Commands.AutoCategorization;
 using PFM.Application.UseCases.Transaction.Commands.CategorizeTransaction;
 using PFM.Application.UseCases.Transaction.Commands.Import;
 using PFM.Application.UseCases.Transaction.Commands.SplitTransaction;
@@ -283,6 +284,43 @@ namespace PFM.Api.Controllers
             }
 
             return Ok();
+        }
+
+        [HttpPost("auto-categorize")]
+        [SwaggerOperation(OperationId = "Transactions_AutoCategorize", Summary = "Auto categorize transactions", Description = "Auto categorizes transactions")]
+        public async Task<IActionResult> AutoCategorize()
+        {
+            var result = await _mediator.Send(new AutoCategorizeTransactionsCommand());
+            if (!result.IsSuccess)
+            {
+                object? errors = null;
+                if (result.code == 503)
+                {
+                    errors = result.Error!
+                    .OfType<ServerError>()
+                    .Select(e => new
+                    {
+                        message = e.Message
+                    })
+                    .ToList();
+                }
+                else if (result.code == 440)
+                {
+                    errors = result.Error!
+                   .OfType<BusinessError>()
+                   .Select(e => new
+                   {
+                       problem = e.Problem,
+                       message = e.Message,
+                       details = e.Details
+                   })
+                   .ToList();
+                }
+
+
+                return StatusCode(result.code, errors);
+            }
+            return Ok("Transactions auto-categorized successfully");
         }
     }
 }

@@ -48,7 +48,6 @@ namespace PFM.Application.UseCases.Transaction.Commands.CategorizeTransaction
                     Message = "The provided category does not exist."
                 };
                 List<BusinessError> errors = new List<BusinessError> { error };
-                Console.WriteLine();
                 return OperationResult.Fail(440, errors);
 
             }

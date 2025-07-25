@@ -41,6 +41,7 @@ builder.Services.AddSwaggerGen(c =>
     c.OperationFilter<CsvTransactionSchemaFilter>();
 
 });
+builder.Configuration.AddJsonFile("Config/rules.json", optional: false);
 
 var app = builder.Build();
 

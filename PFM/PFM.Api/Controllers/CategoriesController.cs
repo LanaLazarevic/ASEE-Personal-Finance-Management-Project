@@ -4,10 +4,12 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using PFM.Application.UseCases.Catagories.Commands.Import;
 using PFM.Application.UseCases.Result;
+using PFM.Application.UseCases.Transaction.Commands.AutoCategorization;
 using PFM.Application.UseCases.Transaction.Commands.Import;
 using Swashbuckle.AspNetCore.Annotations;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace PFM.Api.Controllers
 {

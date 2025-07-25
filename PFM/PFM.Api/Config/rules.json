@@ -1,0 +1,16 @@
+{
+  "CategorizationRules": {
+    "rules": [
+      {
+        "code": "4",
+        "title": "When beneficiary name contains 'chevron' or 'shell' categorize transaction as 4 (Auto & Transport / Gas & Fuel)",
+        "predicate": "beneficiary_name ILIKE '%chevron%' OR beneficiary_name ILIKE '%shell%'"
+      },
+      {
+        "code": "39",
+        "title": "When Mcc is 5811 (Caterers) categorize transaction as 39 (Food & Dining / Restaurants)",
+        "predicate": "\"Mcc\" = 5811"
+      }
+    ]
+  }
+}
