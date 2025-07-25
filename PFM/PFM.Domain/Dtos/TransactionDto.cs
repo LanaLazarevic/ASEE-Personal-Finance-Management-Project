@@ -28,7 +28,7 @@ namespace PFM.Domain.Dtos
         public MccCodeEnum? Mcc { get; set; }
         [JsonPropertyName("kind")]
         public string Kind { get; set; }
-        [JsonPropertyName("cat-code")]
+        [JsonPropertyName("catcode")]
         public string? CatCode { get; set; }
 
         [JsonPropertyName("splits")]

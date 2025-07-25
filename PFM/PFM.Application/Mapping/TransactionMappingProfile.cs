@@ -14,6 +14,7 @@ namespace PFM.Application.Mapping
         public TransactionMappingProfile()
         {
             CreateMap<Transaction, TransactionDto>();
+            CreateMap<Split, SplitItemDto>();
         }
     }
 }

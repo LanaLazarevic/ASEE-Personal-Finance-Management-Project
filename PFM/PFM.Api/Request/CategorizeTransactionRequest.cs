@@ -6,7 +6,6 @@ namespace PFM.Api.Request
     public class CategorizeTransactionRequest
     {
         [JsonPropertyName("catcode")]
-        [Required]
-        public string CategoryCode { get; set; }
+        public required string  CategoryCode { get; set; }
     }
 }
