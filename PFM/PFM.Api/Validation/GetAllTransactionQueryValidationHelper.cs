@@ -133,6 +133,16 @@ namespace PFM.Api.Validation
             }
 
             string sortBy = query.TryGetValue("sort-by", out var sortRaw) ? sortRaw.ToString() : "date";
+            if (!string.IsNullOrWhiteSpace(sortBy) && int.TryParse(sortBy, out _))
+            {
+                errors.Add(new ValidationError
+                {
+                    Tag = "sort-by",
+                    Error = "invalid-type",
+                    Message = "sort-by must be a string, not a number."
+                });
+            }
+
 
             if (startDate.HasValue && endDate.HasValue && endDate.Value.Date < startDate.Value.Date)
             {

@@ -11,42 +11,14 @@ namespace PFM.Application.UseCases.Analytics.Queries.GetSpendingAnalytics
     public class GetSpendingsAnalyticsQueryHandler : IRequestHandler<GetSpendingsAnalyticsQuery, OperationResult<SpendingsGroupDto>>
     {
         private readonly IUnitOfWork _uow;
-        private readonly IValidator<GetSpendingsAnalyticsQuery> _validator;
 
-        public GetSpendingsAnalyticsQueryHandler(IUnitOfWork uow, IValidator<GetSpendingsAnalyticsQuery> validator)
+        public GetSpendingsAnalyticsQueryHandler(IUnitOfWork uow)
         {
             _uow = uow;
-            _validator = validator;
         }
 
         public async Task<OperationResult<SpendingsGroupDto>> Handle(GetSpendingsAnalyticsQuery request, CancellationToken cancellationToken)
         {
-            var result = _validator.Validate(request);
-            if (!result.IsValid)
-            {
-                var errors = result.Errors;
-                List<ValidationError> validationerrors = new List<ValidationError>();
-                foreach (var error in result.Errors)
-                {
-                    var raw = error.ErrorMessage ?? "";
-
-                    var split = raw.Split([':'], 3);
-
-                    var tag = split[0].Trim();
-                    var code = split[1].Trim();
-                    var message = split[2].Trim();
-                    var newError = new ValidationError
-                    {
-                        Tag = tag,
-                        Error = code,
-                        Message = message
-                    };
-                    validationerrors.Add(newError);
-                }
-
-                return OperationResult<SpendingsGroupDto>.Fail(400, validationerrors);
-            }
-
 
             DirectionEnum? directionEnum = null;
 
