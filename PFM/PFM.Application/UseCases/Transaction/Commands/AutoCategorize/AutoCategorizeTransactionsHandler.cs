@@ -38,7 +38,18 @@ namespace PFM.Application.UseCases.Transaction.Commands.AutoCategorize
             }
                 
 
-            await _service.AutoCategorizeTransactionsAsync(rules, cancellationToken);
+            var br = await _service.AutoCategorizeTransactionsAsync(rules, cancellationToken);
+            if(br == -1)
+            {
+                BusinessError error = new BusinessError
+                {
+                    Problem = "invalid-rule",
+                    Details = $"Invalid rule found please check config file",
+                    Message = "Invalid rule found"
+                };
+                List<BusinessError> errors = new List<BusinessError> { error };
+                return OperationResult.Fail(440, errors);
+            }
             return OperationResult.Success();
         }
     }

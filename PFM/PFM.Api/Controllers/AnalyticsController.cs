@@ -24,18 +24,18 @@ namespace PFM.Api.Controllers
         )]
         public async Task<IActionResult> Get()
         {
-            var (queryModel, validationErrors) = AnalyticsQueryValidationHelper.ParseAndValidate(Request.Query);
+            var (queryModel, errors) = AnalyticsQueryValidationHelper.ParseAndValidate(Request.Query);
 
-            if (validationErrors.Any())
-                return BadRequest(validationErrors);
+            if (errors.Any())
+                return BadRequest(new { errors });
 
             var op = await _mediator.Send(queryModel);
             if (!op.IsSuccess)
             {
-                object? errors = null;
+                object? error = null;
                 if (op.code == 503)
                 {
-                    errors = op.Error!
+                    error = op.Error!
                     .OfType<ServerError>()
                     .Select(e => new
                     {
@@ -45,7 +45,7 @@ namespace PFM.Api.Controllers
                 }
 
 
-                return StatusCode(op.code, errors );
+                return StatusCode(op.code,  error );
 
             }
 

@@ -1,11 +1,14 @@
 ﻿using CsvHelper;
 using CsvHelper.Configuration;
+using CsvHelper.TypeConversion;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Net.Http.Headers;
 using PFM.Application.UseCases.Catagories.Commands.Import;
 using PFM.Application.UseCases.Transaction.Commands.Import;
 using System.Globalization;
+using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace PFM.Api.Formatters
 {
@@ -32,30 +35,58 @@ namespace PFM.Api.Formatters
         public override async Task<InputFormatterResult> ReadRequestBodyAsync(
             InputFormatterContext context, Encoding encoding)
         {
+            Console.WriteLine(" CsvInputFormatter aktiviran!");
             string csvContent;
-            using (var reader = new StreamReader(context.HttpContext.Request.Body, encoding))
-            {
-                csvContent = await reader.ReadToEndAsync();
-            }
-
-            using var stringReader = new StringReader(csvContent);
-            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
-            {
-                Delimiter = ",",
-                HasHeaderRecord = true,
-                BadDataFound = null,
-                MissingFieldFound = null,
-                HeaderValidated = null    
-            };
 
             try
             {
+                using (var reader = new StreamReader(context.HttpContext.Request.Body, encoding))
+                {
+                    csvContent = await reader.ReadToEndAsync();
+                    if (string.IsNullOrWhiteSpace(csvContent)                         
+                        || Regex.IsMatch(csvContent, @"^\s*%PDF", RegexOptions.IgnoreCase)   
+                        || Regex.IsMatch(csvContent, @"^\s*PK", RegexOptions.IgnoreCase)     
+                        || Regex.IsMatch(csvContent, @"^\s*\xFF\xD8\xFF")                   
+                        || Regex.IsMatch(csvContent, @"^\s*(ÿØÿÛ|Exif)")                    
+)
+                    {
+                        context.ModelState.TryAddModelError(
+                            "file",
+                            "invalid-format:File is not csv file");
+                        return await InputFormatterResult.FailureAsync();
+                    }
+                }
+
+                using var stringReader = new StringReader(csvContent);
+                var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+                {
+                    Delimiter = ",",
+                    HasHeaderRecord = true,
+                    BadDataFound = null,
+                    MissingFieldFound = null,
+                    HeaderValidated = null
+                };
+
                 if (context.ModelType == typeof(ImportCategoriesCommand) ||
                     context.ModelType == typeof(IEnumerable<CategoryCsv>) ||
                     context.ModelType == typeof(List<CategoryCsv>))
                 {
                     using var sr = new StringReader(csvContent);
                     using var csv = new CsvReader(sr, config);
+
+                    csv.Read();
+                    csv.ReadHeader();
+                    var header = csv.HeaderRecord;
+                    var expectedHeaders = new[] { "code", "name", "parent-code" };
+
+                    if (!expectedHeaders.All(h => header.Contains(h, StringComparer.OrdinalIgnoreCase)))
+                    {
+                        context.ModelState.TryAddModelError(
+                            "header",
+                            "invalid-format: CSV header is not valid. Expected header: code, name, parent-code.");
+                        return await InputFormatterResult.FailureAsync();
+                    }
+
                     var records = csv.GetRecords<CategoryCsv>().ToList();
 
                     if (context.ModelType == typeof(ImportCategoriesCommand))
@@ -73,6 +104,20 @@ namespace PFM.Api.Formatters
                 {
                     using var sr = new StringReader(csvContent);
                     using var csv = new CsvReader(sr, config);
+
+                    csv.Read();
+                    csv.ReadHeader();
+                    var header = csv.HeaderRecord;
+                    var expectedHeaders = new[] { "id", "beneficiary-name", "date", "direction", "amount", "description", "currency", "mcc", "kind" };
+
+                    if (!expectedHeaders.All(h => header.Contains(h, StringComparer.OrdinalIgnoreCase)))
+                    {
+                        context.ModelState.TryAddModelError(
+                            "header",
+                            $"invalid-format: CSV header is not valid. Expected header: {string.Join(", ",expectedHeaders)}");
+                        return await InputFormatterResult.FailureAsync();
+                    }
+
                     var records = csv.GetRecords<TransactionCsv>().ToList();
 
                     if (context.ModelType == typeof(ImportTransactionsCommand))
@@ -84,15 +129,30 @@ namespace PFM.Api.Formatters
                     return await InputFormatterResult.SuccessAsync(records);
                 }
             }
-            catch (Exception ex)
+            catch (HeaderValidationException ex)
             {
-                // ne sve exeptione nego samo da vidim dal je nevalidan parametar
                 context.ModelState.TryAddModelError(
                     context.ModelName,
-                    "Invalid CSV format: " + ex.Message);
+                    $"invalid-format:header validation failed");
                 return await InputFormatterResult.FailureAsync();
             }
-
+            catch (TypeConverterException ex)
+            {
+                context.ModelState.TryAddModelError(
+                    context.ModelName,
+                    $"invalid-format:type conversion failed");
+                return await InputFormatterResult.FailureAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Source
+                    + ex.InnerException);
+                context.ModelState.TryAddModelError(
+                    context.ModelName,
+                    $"invalid-format:invalid CSV format");
+                return await InputFormatterResult.FailureAsync();
+            }
+            
             return await InputFormatterResult.FailureAsync();
         }
     }

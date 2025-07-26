@@ -30,6 +30,11 @@ namespace PFM.Infrastructure.Services
 
             foreach (var rule in rules)
             {
+                if (!CheckSql(rule.Predicate))
+                {
+                    return -1;
+                }
+
                 string sql = $@"
                     UPDATE ""PFM"".""Transactions""
                     SET catcode = @code
@@ -41,6 +46,21 @@ namespace PFM.Infrastructure.Services
             }
 
             return totalAffected;
+        }
+
+        private bool CheckSql(string predicate)
+        {
+            var lowered = predicate.ToLowerInvariant();
+
+            string[] disallowed = { "drop", "delete", "insert", "update", ";", "--", "truncate", "alter" };
+
+            foreach (var word in disallowed)
+            {
+                if (lowered.Contains(word))
+                    return false;
+            }
+
+            return true;
         }
     }
 }

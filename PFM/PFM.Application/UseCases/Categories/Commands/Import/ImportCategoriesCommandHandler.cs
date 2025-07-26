@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace PFM.Application.UseCases.Catagories.Commands.Import
@@ -29,10 +30,10 @@ namespace PFM.Application.UseCases.Catagories.Commands.Import
         public async Task<OperationResult> Handle(ImportCategoriesCommand request, CancellationToken ct)
         {
             var records = request.Records;
-
             var valid = records
                 .Where(r => !string.IsNullOrWhiteSpace(r.Code)
-                         && !string.IsNullOrWhiteSpace(r.Name))
+                         && !string.IsNullOrWhiteSpace(r.Name)
+                         && Regex.IsMatch(r.Name, "[a-zA-Z]"))
                 .ToList();
 
             //if (!valid.Any())

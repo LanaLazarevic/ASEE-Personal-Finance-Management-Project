@@ -34,26 +34,36 @@ namespace PFM.Api.Controllers
         {
             if (!ModelState.IsValid)
             {
-                
-                    var errors = ModelState
-                       .SelectMany(kvp => kvp.Value.Errors
-                       .Select(err =>
-                       {
-                           var raw = err.ErrorMessage ?? "";
-                           var idx = raw.IndexOf(':');
-                           var code = idx > 0 ? raw.Substring(0, idx) : "invalid-format";
-                           var message = idx > 0 ? raw.Substring(idx + 1) : raw;
-                           return new ValidationError
-                           {
-                               Tag = kvp.Key,
-                               Error = code,
-                               Message = message
-                           };
-                       }))
-                       .ToList();
 
-                    return BadRequest(errors);
-                
+                var errors = ModelState
+                   .SelectMany(kvp => kvp.Value.Errors
+                   .Select(err =>
+                   {
+                       var raw = err.ErrorMessage ?? "";
+                       var idx = raw.IndexOf(':');
+                       var code = idx > 0 ? raw.Substring(0, idx) : "invalid-format";
+                       var message = idx > 0 ? raw.Substring(idx + 1) : raw;
+                       var tag = kvp.Key;
+                       if (kvp.Key == "command")
+                       {
+                           tag = "file";
+                           message = "Invalid file format so the command coudnt be processed";
+                       }
+                       else if (kvp.Key == "")
+                       {
+                           tag = "body";
+                       }
+                       return new ValidationError
+                       {
+                           Tag = tag,
+                           Error = code,
+                           Message = message
+                       };
+                   }))
+                   .ToList();
+
+                return BadRequest(new { errors });
+
             }
             var op = await _mediator.Send(command);
             if (!op.IsSuccess)
@@ -95,20 +105,20 @@ namespace PFM.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         { 
-            var (queryModel, validationErrors) = GetAllTransactionQueryValidationHelper.ParseAndValidate(Request.Query);
+            var (queryModel, errors) = GetAllTransactionQueryValidationHelper.ParseAndValidate(Request.Query);
 
-            if (validationErrors.Any())
-                return BadRequest(validationErrors);
+            if (errors.Any())
+                return BadRequest(new { errors });
 
             var op = await _mediator.Send(queryModel);
 
             if (!op.IsSuccess)
             {
-                object? errors = null;
+                object? error = null;
 
                 if (op.code == 503)
                 {
-                    errors = op.Error!
+                    error = op.Error!
                     .OfType<ServerError>()
                     .Select(e => new
                     {
@@ -119,7 +129,7 @@ namespace PFM.Api.Controllers
                 }
 
 
-                return StatusCode(op.code, errors );
+                return StatusCode(op.code, error );
             }
                 
 
@@ -196,7 +206,7 @@ namespace PFM.Api.Controllers
                        message = e.Message,
                        details = e.Details
                    })
-                   .ToList();
+                   .First();
                     return StatusCode(op.code, errors);
                 }
 
@@ -225,14 +235,14 @@ namespace PFM.Api.Controllers
                             var message = idx > 0 ? raw[(idx + 1)..] : raw;
                             return new ValidationError
                             {
-                                Tag = kvp.Key,
+                                Tag = kvp.Key.ToLower(),
                                 Error = code,
                                 Message = message
                             };
                         }))
                         .ToList();
 
-                return BadRequest(errors);
+                return BadRequest(new { errors });
             }
 
             var cmd = new SplitTransactionCommand(id, request.Splits);
@@ -275,7 +285,7 @@ namespace PFM.Api.Controllers
                        message = e.Message,
                        details = e.Details
                    })
-                   .ToList();
+                   .First();
                     return StatusCode(op.code, errors);
                 }
 
@@ -283,7 +293,7 @@ namespace PFM.Api.Controllers
                 return StatusCode(op.code, new { errors });
             }
 
-            return Ok();
+            return Ok("Transaction splitted");
         }
 
         [HttpPost("auto-categorize")]

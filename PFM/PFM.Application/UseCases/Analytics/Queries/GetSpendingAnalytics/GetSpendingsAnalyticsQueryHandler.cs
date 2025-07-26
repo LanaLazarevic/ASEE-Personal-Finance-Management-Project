@@ -27,8 +27,14 @@ namespace PFM.Application.UseCases.Analytics.Queries.GetSpendingAnalytics
                 directionEnum = Enum.Parse<DirectionEnum>(request.Direction, true);
             }
 
+            DateTime? startUtc = request.StartDate.HasValue
+                        ? DateTime.SpecifyKind(request.StartDate.Value, DateTimeKind.Utc)
+                        : (DateTime?)null;
+            DateTime? endUtc = request.EndDate.HasValue
+                        ? DateTime.SpecifyKind(request.EndDate.Value, DateTimeKind.Utc)
+                        : (DateTime?)null;
 
-            var spec = new AnalyticsTransactionQuerySpecification(request.StartDate, request.EndDate, directionEnum);
+            var spec = new AnalyticsTransactionQuerySpecification(startUtc, endUtc, directionEnum);
 
             var txs = await _uow.Transactions.GetForAnalyticsAsync(spec, cancellationToken);
 

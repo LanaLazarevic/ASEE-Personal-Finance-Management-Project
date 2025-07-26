@@ -41,16 +41,25 @@ namespace PFM.Api.Controllers
                            var idx = raw.IndexOf(':');
                            var code = idx > 0 ? raw.Substring(0, idx) : "invalid-format";
                            var message = idx > 0 ? raw.Substring(idx + 1) : raw;
-                           return new ValidationError
+                           var tag = kvp.Key;
+                           if (kvp.Key == "cmd")
                            {
-                               Tag = kvp.Key,
-                               Error = code,
-                               Message = message
+                               tag = "file";
+                               message = "Invalid file format so the command coudnt be processed";
+                           } else if(kvp.Key == "")
+                           {
+                               tag = "body";
+                           }
+                           return new ValidationError
+                               {
+                                   Tag = tag,
+                                   Error = code,
+                                   Message = message
                            };
                        }))
                        .ToList();
 
-                    return BadRequest(errors);
+                    return BadRequest(new {errors});
 
             }
 
