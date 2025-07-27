@@ -37,7 +37,7 @@ namespace PFM.Api.Controllers
             {
 
                 var errors = ModelState
-                   .SelectMany(kvp => kvp.Value.Errors
+                   .SelectMany(kvp => kvp.Value?.Errors
                    .Select(err =>
                    {
                        var raw = err.ErrorMessage ?? "";
@@ -60,7 +60,7 @@ namespace PFM.Api.Controllers
                            Error = code,
                            Message = message
                        };
-                   }))
+                   }) ?? [])
                    .ToList();
 
                 return BadRequest(new { errors });
@@ -108,8 +108,9 @@ namespace PFM.Api.Controllers
         { 
             var (queryModel, errors) = GetAllTransactionQueryValidationHelper.ParseAndValidate(Request.Query);
 
-            if (errors.Any())
+            if (errors.Any() || queryModel == null)
                 return BadRequest(new { errors });
+
 
             var op = await _mediator.Send(queryModel);
 
@@ -159,7 +160,7 @@ namespace PFM.Api.Controllers
             if (!ModelState.IsValid)
             {
                 var errors = ModelState
-                        .SelectMany(kvp => kvp.Value.Errors
+                        .SelectMany(kvp => kvp.Value?.Errors
                         .Select(err =>
                         {
                             var raw = err.ErrorMessage ?? "";
@@ -172,7 +173,7 @@ namespace PFM.Api.Controllers
                                 Error = code,
                                 Message = message
                             };
-                        }))
+                        }) ?? [])
                         .ToList();
 
                 return BadRequest(new { errors });
@@ -268,7 +269,7 @@ namespace PFM.Api.Controllers
 
             var validationErrors = SplitTransactionValidatorHelper.Validate(request.Splits?.ToList());
 
-            if (validationErrors.Any())
+            if (validationErrors.Any() || request.Splits == null)
                 return BadRequest(new { errors = validationErrors });
 
             var cmd = new SplitTransactionCommand(id, request.Splits);

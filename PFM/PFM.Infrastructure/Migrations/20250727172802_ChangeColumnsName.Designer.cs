@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PFM.Infrastructure.Persistence.DbContexts;
@@ -11,9 +12,11 @@ using PFM.Infrastructure.Persistence.DbContexts;
 namespace PFM.Infrastructure.Migrations
 {
     [DbContext(typeof(PFMDbContext))]
-    partial class PFMDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250727172802_ChangeColumnsName")]
+    partial class ChangeColumnsName
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -58,8 +61,7 @@ namespace PFM.Infrastructure.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<double>("Amount")
-                        .HasColumnType("decimal(20,2)")
-                        .HasColumnName("amount");
+                        .HasColumnType("decimal(20,2)");
 
                     b.Property<string>("CatCode")
                         .IsRequired()
@@ -88,8 +90,7 @@ namespace PFM.Infrastructure.Migrations
                         .HasColumnName("id");
 
                     b.Property<double>("Amount")
-                        .HasColumnType("decimal(20,2)")
-                        .HasColumnName("amount");
+                        .HasColumnType("decimal(20,2)");
 
                     b.Property<string>("BeneficiaryName")
                         .HasMaxLength(200)
@@ -109,8 +110,7 @@ namespace PFM.Infrastructure.Migrations
                         .IsFixedLength();
 
                     b.Property<DateTime>("Date")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("date");
+                        .HasColumnType("date");
 
                     b.Property<string>("Description")
                         .HasMaxLength(500)

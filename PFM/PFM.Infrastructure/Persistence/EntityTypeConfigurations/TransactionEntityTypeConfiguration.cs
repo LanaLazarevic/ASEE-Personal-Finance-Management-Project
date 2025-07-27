@@ -17,6 +17,7 @@ namespace PFM.Infrastructure.Persistence.EntityTypeConfigurations
 
             
             builder.Property(t => t.Id)
+                .HasColumnName("id")
                    .IsRequired();
 
             
@@ -27,35 +28,42 @@ namespace PFM.Infrastructure.Persistence.EntityTypeConfigurations
 
           
             builder.Property(t => t.Date)
+                     .HasColumnName("date")
                    .IsRequired();
 
            
             builder.Property(t => t.Direction)
+                .HasColumnName("direction")
                    .IsRequired();
 
             builder.Property(t => t.Amount)
+                     .HasColumnName("amount")
                    .HasColumnType("decimal(20,2)")
                    .IsRequired();
 
            
             builder.Property(t => t.Description)
+                     .HasColumnName("description")
                    .HasMaxLength(500)
                    .IsRequired(false);
 
            
             builder.Property(t => t.Currency)
+                     .HasColumnName("currency")
                    .HasMaxLength(3)
                    .IsFixedLength()    
                    .IsRequired();
 
           
             builder.Property(t => t.Mcc)
+                     .HasColumnName("mcc")
                    .HasConversion<int>()
                    .HasColumnType("integer")
                    .IsRequired(false);
 
           
             builder.Property(t => t.Kind)
+                     .HasColumnName("kind")
                    .IsRequired();
 
      

@@ -41,11 +41,58 @@ namespace PFM.Infrastructure.Persistence.Repositories
             if (spec.Kind != null && spec.Kind.Any())
                 query = query.Where(t => spec.Kind.Contains(t.Kind));
 
+            /* query = spec.SortBy.ToLower() switch
+             {
+                 "amount" => spec.SortOrder == SortOrder.Asc
+                     ? query.OrderBy(t => t.Amount)
+                     : query.OrderByDescending(t => t.Amount),
+                 _ => spec.SortOrder == SortOrder.Asc
+                     ? query.OrderBy(t => t.Date)
+                     : query.OrderByDescending(t => t.Date)
+             };*/
+
             query = spec.SortBy.ToLower() switch
             {
+                "id" => spec.SortOrder == SortOrder.Asc
+                    ? query.OrderBy(t => t.Id)
+                    : query.OrderByDescending(t => t.Id),
+
+                "beneficiaryname" => spec.SortOrder == SortOrder.Asc
+                    ? query.OrderBy(t => t.BeneficiaryName)
+                    : query.OrderByDescending(t => t.BeneficiaryName),
+
+                "date" => spec.SortOrder == SortOrder.Asc
+                    ? query.OrderBy(t => t.Date)
+                    : query.OrderByDescending(t => t.Date),
+
+                "direction" => spec.SortOrder == SortOrder.Asc
+                    ? query.OrderBy(t => t.Direction.ToString())
+                    : query.OrderByDescending(t => t.Direction.ToString()),
+
                 "amount" => spec.SortOrder == SortOrder.Asc
                     ? query.OrderBy(t => t.Amount)
                     : query.OrderByDescending(t => t.Amount),
+
+                "description" => spec.SortOrder == SortOrder.Asc
+                    ? query.OrderBy(t => t.Description)
+                    : query.OrderByDescending(t => t.Description),
+
+                "currency" => spec.SortOrder == SortOrder.Asc
+                    ? query.OrderBy(t => t.Currency)
+                    : query.OrderByDescending(t => t.Currency),
+
+                "mcc" => spec.SortOrder == SortOrder.Asc
+                    ? query.OrderBy(t => t.Mcc.HasValue ? t.Mcc.ToString() : "")
+                    : query.OrderByDescending(t => t.Mcc.HasValue ? t.Mcc.ToString() : ""),
+
+                "kind" => spec.SortOrder == SortOrder.Asc
+                    ? query.OrderBy(t => t.Kind.ToString())
+                    : query.OrderByDescending(t => t.Kind.ToString()),
+
+                "catcode" => spec.SortOrder == SortOrder.Asc
+                    ? query.OrderBy(t => t.CatCode)
+                    : query.OrderByDescending(t => t.CatCode),
+
                 _ => spec.SortOrder == SortOrder.Asc
                     ? query.OrderBy(t => t.Date)
                     : query.OrderByDescending(t => t.Date)
@@ -109,5 +156,6 @@ namespace PFM.Infrastructure.Persistence.Repositories
 
             return await q.ToListAsync(ct);
         }
+
     }
 }

@@ -9,7 +9,42 @@
       {
         "code": "39",
         "title": "When Mcc is 5811 (Caterers) categorize transaction as 39 (Food & Dining / Restaurants)",
-        "predicate": "\"Mcc\" = 5811"
+        "predicate": "mcc = 5811"
+      },
+      {
+        "code": "E",
+        "title": "When beneficiary is 'glovo' or 'wolt' categorize as E (Entertainment / Food Delivery)",
+        "predicate": "beneficiary_name ILIKE '%glovo%' OR beneficiary_name ILIKE '%wolt%'"
+      },
+      {
+        "code": "J",
+        "title": "When description contains 'rent' or beneficiary is 'claire stevens' categorize as J (Home)",
+        "predicate": "description ILIKE '%rent%' OR beneficiary_name ILIKE '%claire stevens%'"
+      },
+      {
+        "code": "25",
+        "title": "When description contains 'atm withdrawal' or beneficiary is 'revolut' categorize as 25 (Fees & Charges / ATM)",
+        "predicate": "description ILIKE '%atm withdrawal%' OR beneficiary_name ILIKE '%revolut%'"
+      },
+      {
+        "code": "44",
+        "title": "When mcc is 8011 or 8050 or beneficiary is 'dental plus' or 'blue moon spa' categorize as 44 (Health & Fitness / Services)",
+        "predicate": "mcc IN (8011, 8050) OR beneficiary_name ILIKE '%dental plus%' OR beneficiary_name ILIKE '%blue moon spa%'"
+      },
+      {
+        "code": "G",
+        "title": "When beneficiary is 'metlife' or description contains 'insurance' categorize as G (Financial / Insurance)",
+        "predicate": "beneficiary_name ILIKE '%metlife%' OR description ILIKE '%insurance%'"
+      },
+      {
+        "code": "C",
+        "title": "When beneficiary contains 'a1 telecom' or description contains 'phone' categorize as C (Bills & Utilities)",
+        "predicate": "beneficiary_name ILIKE '%a1 telecom%' OR description ILIKE '%phone%'"
+      },
+      {
+        "code": "15",
+        "title": "When beneficiary contains 'faculty of contemporary arts' categorize as 15 (Education / Tuition)",
+        "predicate": "beneficiary_name ILIKE '%faculty of contemporary arts%'"
       }
     ]
   }

@@ -7,6 +7,7 @@ using PFM.Application.UseCases.Catagories.Commands.Import;
 using PFM.Application.UseCases.Transaction.Commands.Import;
 using PFM.Infrastructure.DependencyInjection;
 using PFM.Infrastructure.Persistence.DbContexts;
+using SixLabors.ImageSharp;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<PFMDbContext>();
@@ -33,6 +34,9 @@ builder.Services
     })
     .AddJsonOptions(o => { /* ... */ })
     .AddXmlSerializerFormatters();
+builder.Services.AddCors(options => options.AddPolicy( "cors", policy => policy.WithOrigins(Environment.GetEnvironmentVariable("FRONTEND_URL")??"")
+                                                                                                        .AllowAnyHeader()
+                                                                                                        .AllowAnyMethod()));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -71,6 +75,8 @@ app.UseExceptionHandler(errApp =>
         });
     });
 });
+
+app.UseCors("cors");
 
 
 

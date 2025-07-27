@@ -1,0 +1,30 @@
+services:
+    pfm_api:
+        image: pfm_api
+        build:
+            context: ..
+            dockerfile: Scripts/Api/Dockerfile
+        env_file:
+            - Environment/api.env
+        ports:
+            - "${API_EXPOSE_PORT}:8080"
+        depends_on:
+            pfm_database:
+                condition: service_healthy
+    pfm_database:
+        image: postgres:17.4-alpine
+        env_file:
+            - Environment/database.env
+        ports:
+            - "${DATABASE_EXPOSE_PORT}:5432"
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+        healthcheck:
+            test: "pg_isready -d $$POSTGRES_DB -U $$POSTGRES_USER"
+            start_period: 1s
+            interval: 1s
+            retries: 8 
+
+volumes:
+    postgres_data:
+        name: pfm_database

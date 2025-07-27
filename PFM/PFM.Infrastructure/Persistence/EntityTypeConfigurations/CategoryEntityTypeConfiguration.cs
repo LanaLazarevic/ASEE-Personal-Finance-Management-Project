@@ -16,14 +16,17 @@ namespace PFM.Infrastructure.Persistence.EntityTypeConfigurations
             builder.HasKey(c => c.Code);
 
             builder.Property(c => c.Code)
+                     .HasColumnName("code")
                    .IsRequired()
                    .HasMaxLength(20);
 
             builder.Property(c => c.Name)
+                     .HasColumnName("name")
                    .IsRequired()
                    .HasMaxLength(150);
 
             builder.Property(c => c.ParentCode)
+                    .HasColumnName("parent_code")
                    .HasMaxLength(20)
                     .IsRequired(false);
 

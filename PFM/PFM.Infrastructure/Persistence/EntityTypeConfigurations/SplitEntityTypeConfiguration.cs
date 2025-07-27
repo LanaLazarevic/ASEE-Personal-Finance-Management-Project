@@ -16,10 +16,12 @@ namespace PFM.Infrastructure.Persistence.EntityTypeConfigurations
             builder.HasKey(s => s.Id);
 
             builder.Property(s => s.Id)
+                     .HasColumnName("id")
                    .UseIdentityColumn()
                    .IsRequired();
 
             builder.Property(s => s.TransactionId)
+                     .HasColumnName("transaction_id")
                    .IsRequired();
 
             builder.Property(s => s.CatCode)
@@ -28,6 +30,7 @@ namespace PFM.Infrastructure.Persistence.EntityTypeConfigurations
                    .IsRequired();
 
             builder.Property(s => s.Amount)
+                     .HasColumnName("amount")
                    .HasColumnType("decimal(20,2)")
                    .IsRequired();
 
