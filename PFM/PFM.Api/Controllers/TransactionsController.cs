@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using NPOI.SS.UserModel;
 using Org.BouncyCastle.Ocsp;
 using PFM.Api.Request;
 using PFM.Api.Validation;
@@ -221,29 +222,44 @@ namespace PFM.Api.Controllers
         [SwaggerOperation(OperationId = "Transactions_Split",
         Summary = "Split transaction by id",
         Description = "Splits transaction by id of the transaction")]
-        public async Task<ActionResult> Split([FromRoute] string id, [FromBody] SplitTransactionRequest request)
+        public async Task<ActionResult> Split([FromRoute] string id)
         {
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState
-                        .SelectMany(kvp => kvp.Value.Errors
-                        .Select(err =>
-                        {
-                            var raw = err.ErrorMessage ?? "";
-                            var idx = raw.IndexOf(':');
-                            var code = idx > 0 ? raw[..idx] : "invalid-format";
-                            var message = idx > 0 ? raw[(idx + 1)..] : raw;
-                            return new ValidationError
-                            {
-                                Tag = kvp.Key.ToLower(),
-                                Error = code,
-                                Message = message
-                            };
-                        }))
-                        .ToList();
+            using var reader = new StreamReader(Request.Body);
+            var rawBody = await reader.ReadToEndAsync();
 
+            SplitTransactionRequest? request;
+            try
+            {
+                request = JsonSerializer.Deserialize<SplitTransactionRequest>(rawBody, new JsonSerializerOptions { });
+
+                if (request == null)
+                {
+                    List<ValidationError> errors = new List<ValidationError>();
+                    errors.Add(new ValidationError
+                    {
+                        Tag = "body",
+                        Error = "invalid-format",
+                        Message = "Request body is empty or malformed."
+                    });
+                    return BadRequest(new { errors});
+                }
+            }
+            catch (JsonException)
+            {
+                List<ValidationError> errors = new List<ValidationError>();
+                errors.Add(new ValidationError
+                {
+                    Tag = "body",
+                    Error = "invalid-format",
+                    Message = "Could not parse request body."
+                });
                 return BadRequest(new { errors });
             }
+
+            var validationErrors = SplitTransactionValidatorHelper.Validate(request.Splits?.ToList());
+
+            if (validationErrors.Any())
+                return BadRequest(new { errors = validationErrors });
 
             var cmd = new SplitTransactionCommand(id, request.Splits);
             var op = await _mediator.Send(cmd);
@@ -251,20 +267,7 @@ namespace PFM.Api.Controllers
             if (!op.IsSuccess)
             {
                 object? errors = null;
-                if (op.code == 400)
-                {
-                    errors = op.Error!
-                    .OfType<ValidationError>()
-                    .Select(e => new
-                    {
-                        tag = e.Tag,
-                        error = e.Error,
-                        message = e.Message
-                    })
-                    .ToList();
-                    return StatusCode(op.code, new { errors });
-                }
-                else if (op.code == 503)
+                if (op.code == 503)
                 {
                     errors = op.Error!
                     .OfType<ServerError>()
@@ -273,7 +276,6 @@ namespace PFM.Api.Controllers
                         message = e.Message
                     })
                     .ToList();
-                    return StatusCode(op.code, errors);
                 }
                 else if (op.code == 440)
                 {
@@ -286,11 +288,11 @@ namespace PFM.Api.Controllers
                        details = e.Details
                    })
                    .First();
-                    return StatusCode(op.code, errors);
+                   
                 }
 
 
-                return StatusCode(op.code, new { errors });
+                return StatusCode(op.code, errors);
             }
 
             return Ok("Transaction splitted");
