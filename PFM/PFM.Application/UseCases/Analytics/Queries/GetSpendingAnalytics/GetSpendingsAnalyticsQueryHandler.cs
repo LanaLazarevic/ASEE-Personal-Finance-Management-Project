@@ -71,7 +71,7 @@ namespace PFM.Application.UseCases.Analytics.Queries.GetSpendingAnalytics
                         } ]);
 
 
-            var groupsQuery = string.IsNullOrWhiteSpace(request.CatCode)
+            /*var groupsQuery = string.IsNullOrWhiteSpace(request.CatCode)
                 ? flat.GroupBy(x => string.IsNullOrEmpty(x.Parent) ? x.Cat : x.Parent)
                 : flat.Where(x => x.Parent == request.CatCode)
                       .GroupBy(x => x.Cat);
@@ -83,7 +83,55 @@ namespace PFM.Application.UseCases.Analytics.Queries.GetSpendingAnalytics
                     Amount = g.Sum(x => x.Amount),
                     Count = g.Count()
                 })
-                .ToList();
+                .ToList();*/
+            List<SpendingGroupDto> groups;
+
+            if (string.IsNullOrWhiteSpace(request.CatCode))
+            {
+                groups = flat
+                    .GroupBy(x => string.IsNullOrEmpty(x.Parent) ? x.Cat : x.Parent)
+                    .Select(g => new SpendingGroupDto
+                    {
+                        CatCode = g.Key,
+                        Amount = g.Sum(x => x.Amount),
+                        Count = g.Count()
+                    })
+                    .ToList();
+            }
+            else
+            {
+                
+                var childGroups = flat
+                    .Where(x => x.Parent == request.CatCode)
+                    .GroupBy(x => x.Cat)
+                    .Select(g => new SpendingGroupDto
+                    {
+                        CatCode = g.Key,
+                        Amount = g.Sum(x => x.Amount),
+                        Count = g.Count()
+                    })
+                    .ToList();
+
+                if (childGroups.Any())
+                {
+                    
+                    groups = childGroups;
+                }
+                else
+                {
+                    
+                    groups = flat
+                        .Where(x => x.Cat == request.CatCode)
+                        .GroupBy(x => x.Cat)
+                        .Select(g => new SpendingGroupDto
+                        {
+                            CatCode = g.Key,
+                            Amount = g.Sum(x => x.Amount),
+                            Count = g.Count()
+                        })
+                        .ToList();
+                }
+            }
 
             return OperationResult<SpendingsGroupDto>.Success(
                 new SpendingsGroupDto { Groups = groups }, 200

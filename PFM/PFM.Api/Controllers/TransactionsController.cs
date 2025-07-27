@@ -83,7 +83,7 @@ namespace PFM.Api.Controllers
                     .ToList();
                     return StatusCode(op.code, new { errors });
                 }
-                else if (op.code == 503)
+                else
                 {
                     errors = op.Error!
                     .OfType<ServerError>()
@@ -96,7 +96,7 @@ namespace PFM.Api.Controllers
                 }
 
 
-                return StatusCode(op.code, new { errors });
+                //return StatusCode(op.code, new { errors });
 
             }
 
@@ -126,11 +126,21 @@ namespace PFM.Api.Controllers
                         message = e.Message
                     })
                     .ToList();
-                    
+                    return StatusCode(op.code, error);
                 }
-
-
-                return StatusCode(op.code, error );
+                else
+                {
+                    error = op.Error!
+                   .OfType<ValidationError>()
+                   .Select(e => new
+                   {
+                       tag = e.Tag,
+                       error = e.Error,
+                       message = e.Message
+                   })
+                   .ToList();
+                    return StatusCode(op.code, new { errors });
+                }
             }
                 
 
@@ -165,7 +175,7 @@ namespace PFM.Api.Controllers
                         }))
                         .ToList();
 
-                return BadRequest(errors);
+                return BadRequest(new { errors });
             }
 
             var cmd = new CategorizeTransactionCommand(id, req.CategoryCode);
@@ -197,7 +207,7 @@ namespace PFM.Api.Controllers
                     })
                     .ToList();
                     return StatusCode(op.code, errors);
-                } else if (op.code == 440)
+                } else
                 {
                     errors = op.Error!
                    .OfType<BusinessError>()
@@ -212,7 +222,7 @@ namespace PFM.Api.Controllers
                 }
 
 
-                return StatusCode(op.code, new { errors });
+                //return StatusCode(op.code, new { errors });
             }
 
             return Ok("Transaction categorized successfully");

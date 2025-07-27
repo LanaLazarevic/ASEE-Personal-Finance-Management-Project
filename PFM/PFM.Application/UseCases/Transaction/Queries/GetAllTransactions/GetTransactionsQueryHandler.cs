@@ -69,6 +69,19 @@ namespace PFM.Application.UseCases.Transaction.Queries.GetAllTransactions
             try
             {
                 var transactions = await _repository.Transactions.GetTransactionsAsync(spec);
+
+                if (request.Page > transactions.TotalPages && transactions.TotalPages != 0)
+                {
+                    ValidationError error = new ValidationError
+                    {
+                        Tag = "page",
+                        Error = "out-of-range",
+                        Message = $"Page {request.Page} is out of range. Total pages: {transactions.TotalPages}."
+                    };
+                    List<ValidationError> errors = new List<ValidationError> { error };
+                    return OperationResult<PagedList<TransactionDto>>.Fail(440, errors);
+                }
+
                 return OperationResult<PagedList<TransactionDto>>.Success(transactions, 200);
             }
             catch (TimeoutException tex)
