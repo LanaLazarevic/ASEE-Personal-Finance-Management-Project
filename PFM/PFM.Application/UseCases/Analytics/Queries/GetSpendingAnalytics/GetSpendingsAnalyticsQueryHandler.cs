@@ -20,6 +20,24 @@ namespace PFM.Application.UseCases.Analytics.Queries.GetSpendingAnalytics
         public async Task<OperationResult<SpendingsGroupDto>> Handle(GetSpendingsAnalyticsQuery request, CancellationToken cancellationToken)
         {
 
+            if(!string.IsNullOrWhiteSpace(request.CatCode))
+            {
+                var cats = await _uow.Categories.GetByCodesAsync(new[] { request.CatCode }, cancellationToken);
+                var cat = cats.SingleOrDefault();
+                if (cat == null)
+                {
+                    BusinessError error = new BusinessError
+                    {
+                        Problem = "provided-category-does-not-exists",
+                        Details = $"Category '{request.CatCode}' not found.",
+                        Message = "The provided category does not exist."
+                    };
+                    List<BusinessError> errors = new List<BusinessError> { error };
+                    return OperationResult<SpendingsGroupDto>.Fail(440, errors);
+
+                }
+            }
+           
             DirectionEnum? directionEnum = null;
 
             if (!string.IsNullOrWhiteSpace(request.Direction))

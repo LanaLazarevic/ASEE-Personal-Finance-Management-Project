@@ -42,10 +42,21 @@ namespace PFM.Api.Controllers
                         message = e.Message
                     })
                     .ToList();
+                } else if (op.code == 440)
+                {
+                    error = op.Error!
+                    .OfType<BusinessError>()
+                    .Select(e => new
+                    {
+                        problem = e.Problem,
+                        message = e.Message,
+                        details = e.Details
+                    })
+                    .First();
                 }
 
 
-                return StatusCode(op.code,  error );
+                    return StatusCode(op.code, error);
 
             }
 
