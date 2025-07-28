@@ -1,4 +1,5 @@
-﻿using PFM.Domain.Entities;
+﻿using PFM.Domain.Dtos;
+using PFM.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,9 @@ namespace PFM.Domain.Interfaces
     public interface ICategoryRepository
     {
         Task<List<Category>> GetByCodesAsync(IEnumerable<string> codes, CancellationToken ct = default);
+
+        Task<List<CategoryDto>> GetAll(string? code, CancellationToken ct = default);
+
         void Add(Category category);
     }
 }

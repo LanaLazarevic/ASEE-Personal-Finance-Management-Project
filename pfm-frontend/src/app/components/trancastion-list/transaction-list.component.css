@@ -1,0 +1,77 @@
+/* transaction-list.component.css */
+
+/* Reset Tailwind-ovih belih pozadina */
+:is(.bg-white, .bg-gray-100, .bg-slate-50, .bg-slate-100) {
+  background-color: hsl(var(--card)) !important;
+}
+
+/* Glavni kontejner */
+.min-h-screen {
+  background-color: hsl(var(--background)) !important;
+}
+
+/* Header kartica */
+.bg-gray-100 {
+  background-color: #636063 !important;
+  border: 1px solid hsl(215, 27.9%, 16.9%) !important;
+}
+
+/* Tabela i kartice */
+.bg-white {
+  background-color: #777478 !important;
+  border: 1px solid hsl(215, 27.9%, 16.9%) !important;
+}
+
+/* Tekst */
+.text-gray-800, .text-slate-800 {
+  color: white !important;
+}
+
+.text-gray-600, .text-slate-400 {
+  color: lavender !important;
+}
+
+/* Tabela */
+table {
+  width: 100%;
+  background-color: transparent !important;
+}
+
+th {
+  background-color: #777478 !important;
+  color: hsl(210, 40%, 98%) !important;
+  border-bottom: 2px solid hsl(263, 70%, 50%) !important;
+}
+
+td {
+  border-bottom: 1px solid hsl(215, 27.9%, 16.9%) !important;
+}
+
+/* Redovi tabele */
+tr:nth-child(even) {
+  background-color: hsla(215, 27.9%, 16.9%, 0.5) !important;
+}
+
+tr:nth-child(odd) {
+  background-color: hsla(215, 27.9%, 16.9%, 0.3) !important;
+}
+
+tr:hover {
+  background-color: hsl(263, 70%, 30%) !important;
+}
+
+/* Paginacija */
+.pagination-button {
+  background-color: hsl(224, 71%, 4%) !important;
+  border: 1px solid hsl(215, 27.9%, 16.9%) !important;
+}
+
+.pagination-active {
+  background-color: hsl(263, 70%, 50%) !important;
+}
+
+/* Badgeovi */
+.badge {
+  background-color: hsl(263, 70%, 50%) !important;
+  color: white !important;
+}

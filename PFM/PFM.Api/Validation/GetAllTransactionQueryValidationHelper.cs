@@ -15,7 +15,7 @@ namespace PFM.Api.Validation
             if (query.TryGetValue("transaction-kind", out var kindValues))
             {
                 kinds = kindValues
-                    .SelectMany(k => k.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                    .SelectMany(k => k?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [])
                     .ToList();
 
                 var enumNames = Enum.GetNames(typeof(TransactionKind));

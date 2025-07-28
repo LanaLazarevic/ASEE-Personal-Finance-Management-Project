@@ -35,7 +35,7 @@ namespace PFM.Application.UseCases.Resault
     public class OperationResult : OperationResult<Unit>
     {
         private OperationResult(bool success, Unit? value, int code, IEnumerable<Error>? errors)
-            : base(success, value: (Unit)value, code, errors) { }
+            : base(success, (Unit)value, code, errors) { }
 
         public static OperationResult Success()
             => new(true, Unit.Value, 200, default);

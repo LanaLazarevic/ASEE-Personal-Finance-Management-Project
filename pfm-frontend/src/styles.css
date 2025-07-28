@@ -1,0 +1,21 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background:#777478;
+    --foreground: #777478;
+    --card: #777478;
+    --card-foreground: #777478;
+    --primary: #777478;
+    --primary-foreground: #777478;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+  }
+}

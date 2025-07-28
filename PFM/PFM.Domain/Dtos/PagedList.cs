@@ -18,11 +18,11 @@ namespace PFM.Domain.Dtos
         [JsonPropertyName("total-pages")]
         public int TotalPages { get; set; }
         [JsonPropertyName("sort-orderd")]
-        public string SortOrderd { get; set; }
+        public required string SortOrderd { get; set; }
         [JsonPropertyName("sort-by")]
-        public string SortBy { get; set; }
+        public required string SortBy { get; set; }
         [JsonPropertyName("items")]
-        public IEnumerable<T> Items { get; set; }
+        public required IEnumerable<T> Items { get; set; }
 
     }
 }

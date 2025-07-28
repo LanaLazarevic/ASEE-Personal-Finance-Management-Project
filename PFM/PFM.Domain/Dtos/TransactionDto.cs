@@ -15,7 +15,7 @@ namespace PFM.Domain.Dtos
         [JsonPropertyName("date")]
         public DateTime Date { get; set; }
         [JsonPropertyName("direction")]
-        public string Direction { get; set; }
+        public required string Direction { get; set; }
         [JsonPropertyName("amount")]
         public double Amount { get; set; }
         [JsonPropertyName("beneficiary-name")]
@@ -27,7 +27,7 @@ namespace PFM.Domain.Dtos
         [JsonPropertyName("mcc")]
         public MccCodeEnum? Mcc { get; set; }
         [JsonPropertyName("kind")]
-        public string Kind { get; set; }
+        public required string Kind { get; set; }
         [JsonPropertyName("catcode")]
         public string? CatCode { get; set; }
 

@@ -10,11 +10,11 @@ namespace PFM.Application.UseCases.Result
     public class BusinessError : Error
     {
         [JsonPropertyName("problem")]
-        public string Problem { get; set; }
+        public required string Problem { get; set; }
         [JsonPropertyName("message")]
-        public string Message { get; set; }
+        public required string Message { get; set; }
         [JsonPropertyName("details")]
-        public string Details { get; set; }
+        public required string Details { get; set; }
        
     }
 }

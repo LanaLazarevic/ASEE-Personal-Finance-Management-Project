@@ -3,9 +3,11 @@ using CsvHelper.Configuration;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using PFM.Application.UseCases.Catagories.Commands.Import;
+using PFM.Application.UseCases.Categories.Queries.CetAllCategories;
 using PFM.Application.UseCases.Result;
 using PFM.Application.UseCases.Transaction.Commands.AutoCategorization;
 using PFM.Application.UseCases.Transaction.Commands.Import;
+using PFM.Domain.Entities;
 using Swashbuckle.AspNetCore.Annotations;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
@@ -34,7 +36,7 @@ namespace PFM.Api.Controllers
             {
                 
                     var errors = ModelState
-                       .SelectMany(kvp => kvp.Value.Errors
+                       .SelectMany(kvp => kvp.Value?.Errors
                        .Select(err =>
                        {
                            var raw = err.ErrorMessage ?? "";
@@ -56,7 +58,7 @@ namespace PFM.Api.Controllers
                                    Error = code,
                                    Message = message
                            };
-                       }))
+                       }) ?? [])
                        .ToList();
 
                     return BadRequest(new {errors});
@@ -97,6 +99,61 @@ namespace PFM.Api.Controllers
             }
 
             return Ok("Categories imported successfully");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll([FromQuery] GetCatagoriesQuery cmd)
+        {
+
+            if (!ModelState.IsValid)
+            {
+
+                var errors = ModelState
+                   .SelectMany(kvp => kvp.Value?.Errors
+                   .Select(err =>
+                   {
+                       var raw = err.ErrorMessage ?? "";
+                       var idx = raw.IndexOf(':');
+                       var code = idx > 0 ? raw.Substring(0, idx) : "invalid-format";
+                       var message = idx > 0 ? raw.Substring(idx + 1) : raw;
+                       var tag = kvp.Key;
+                       if (kvp.Key == "cmd")
+                       {
+                           tag = "catcode";
+                           message = "Invalid query format so the command coudn't be processed";
+                       }
+                       else if (kvp.Key == "")
+                       {
+                           tag = "body";
+                       }
+                       return new ValidationError
+                       {
+                           Tag = tag,
+                           Error = code,
+                           Message = message
+                       };
+                   }) ?? [])
+                   .ToList();
+
+                return BadRequest(new { errors });
+
+            }
+
+            var result = await _mediator.Send(cmd);
+
+            if (!result.IsSuccess)
+            {
+                var errors = result.Error!
+                    .OfType<ServerError>()
+                    .Select(e => new
+                    {
+                        message = e.Message
+                    })
+                    .ToList();
+                return StatusCode(result.code, errors);
+            }
+
+            return Ok(new { items = result.Value});
         }
     }
 }

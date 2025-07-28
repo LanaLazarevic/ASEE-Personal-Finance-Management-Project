@@ -8,8 +8,8 @@ namespace PFM.Domain.Dtos
 {
     public class CategorizationRule
     {
-        public string Code { get; set; }
-        public string Title { get; set; }
-        public string Predicate { get; set; }
+        public required string Code { get; set; }
+        public required string Title { get; set; }
+        public required string Predicate { get; set; }
     }
 }

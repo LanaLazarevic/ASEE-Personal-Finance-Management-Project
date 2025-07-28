@@ -7,7 +7,6 @@ namespace PFM.Api.Request
     public class SplitTransactionRequest
     {
         [JsonPropertyName("splits")]
-        [Required]
-        public IEnumerable<SplitItemDto> Splits { get; set; }
+        public required IEnumerable<SplitItemDto> Splits { get; set; }
     }
 }

@@ -15,11 +15,11 @@ using System.Threading.Tasks;
 
 namespace PFM.Application.UseCases.Transaction.Queries.GetAllTransactions
 {
-    public class GetTransactionsQueryHandler : IRequestHandler<GetTransactionsQuery, OperationResult<PagedList<TransactionDto>>>
+    public class GetCategoriesQueryHandler : IRequestHandler<GetTransactionsQuery, OperationResult<PagedList<TransactionDto>>>
     {
         private readonly IUnitOfWork _repository;
 
-        public GetTransactionsQueryHandler(IUnitOfWork repository)
+        public GetCategoriesQueryHandler(IUnitOfWork repository)
         {
             _repository = repository;
         }

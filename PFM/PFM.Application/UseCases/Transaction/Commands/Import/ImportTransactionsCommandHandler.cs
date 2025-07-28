@@ -34,16 +34,29 @@ namespace PFM.Application.UseCases.Transaction.Commands.Import
             foreach (var r in request.Transactions)
             {
                 if (string.IsNullOrWhiteSpace(r.Id)
-                    || !DateTime.TryParseExact(r.Date.Trim(), "M/d/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out _)
+                    || !DateTime.TryParseExact(r.Date?.Trim(), "M/d/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out _)
                     || string.IsNullOrWhiteSpace(r.Direction)
-                    || !double.TryParse(r.Amount.Replace("€", string.Empty).Trim(), NumberStyles.Any, CultureInfo.InvariantCulture, out _)
+                    || !double.TryParse(r.Amount?.Replace("€", string.Empty).Trim(), NumberStyles.Any, CultureInfo.InvariantCulture, out _)
                     || string.IsNullOrWhiteSpace(r.Currency)
                     || string.IsNullOrWhiteSpace(r.Kind))
                     continue;
                 valid.Add(r);
             }
 
-            //if (!valid.Any())
+            if (!valid.Any())
+            {
+                return OperationResult.Fail(
+                    400,
+                    new List<ValidationError>
+                    {
+                        new ValidationError
+                        {
+                            Tag = "file",
+                            Message = "File doesnt contain a signle valid row.",
+                            Error = "invalid-format"
+                        }
+                    });
+            }
 
             var allIds = valid.Select(r => r.Id).Distinct().ToList();
             var existingIds = await _uow.Transactions.GetExistingIdsAsync(allIds, cancellationToken);
@@ -54,6 +67,9 @@ namespace PFM.Application.UseCases.Transaction.Commands.Import
             {
                 foreach (var row in valid)
                 {
+                    if(row == null || string.IsNullOrWhiteSpace(row.Id))
+                        continue;
+
                     if (existingIds.Contains(row.Id))
                     {
                         skippedIds.Add(row.Id);

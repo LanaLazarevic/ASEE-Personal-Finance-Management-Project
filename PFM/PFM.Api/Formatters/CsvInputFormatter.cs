@@ -129,14 +129,14 @@ namespace PFM.Api.Formatters
                     return await InputFormatterResult.SuccessAsync(records);
                 }
             }
-            catch (HeaderValidationException ex)
+            catch (HeaderValidationException)
             {
                 context.ModelState.TryAddModelError(
                     context.ModelName,
                     $"invalid-format:header validation failed");
                 return await InputFormatterResult.FailureAsync();
             }
-            catch (TypeConverterException ex)
+            catch (TypeConverterException)
             {
                 context.ModelState.TryAddModelError(
                     context.ModelName,

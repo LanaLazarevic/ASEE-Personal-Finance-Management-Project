@@ -1,0 +1,287 @@
+<div class="min-h-screen bg-[#424042] py-8">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="bg-[#363536] rounded-lg shadow-sm mb-8 p-6 border border-[#2a292a]">
+      <h1 class="text-3xl font-bold text-purple-400 mb-2">Personal Finance Management</h1>
+      <p class="text-gray-300">Overview of all transactions</p>
+    </div>
+
+    <!-- Loading State -->
+    @if (loading) {
+      <div class="bg-[#363536] rounded-lg shadow-sm p-8 text-center border border-[#2a292a]">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[#7c5cf6] mx-auto mb-4"></div>
+        <p class="text-gray-300">Loading transactions...</p>
+      </div>
+    }
+
+    <!-- Error State -->
+    @if (error) {
+      <div class="bg-red-900/20 rounded-lg p-4 mb-6 border border-red-900/30">
+        <div class="flex items-center">
+          <svg class="w-5 h-5 text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <span class="text-red-300 font-medium">Failed to load transactions</span>
+        </div>
+      </div>
+    }
+
+    <!-- Filter Button -->
+    <div class="mb-4 flex justify-end">
+      <button (click)="toggleFilter()" class="px-4 py-2 bg-[#4a3a6e] text-white rounded-lg hover:bg-[#5d4a85] transition-colors">
+        Filter
+      </button>
+    </div>
+
+    <!-- Filter Form -->
+    @if (showFilter) {
+      <div class="bg-[#363536] rounded-lg shadow-sm mb-6 p-6 border border-[#2a292a]">
+        <form (ngSubmit)="applyFilters()" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Kind Filter -->
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-1">Transaction Kind</label>
+            <select [(ngModel)]="filterParams['transaction-kind']" name="kind" multiple class="w-full bg-[#2a292a] border border-[#3d3c3d] text-white rounded-lg p-2">
+              <option value="dep">Deposit</option>
+              <option value="wdw">Withdrawal</option>
+              <option value="pmt">Payment</option>
+              <option value="fee">Fee</option>
+              <option value="inc">Income</option>
+              <option value="rev">Reversal</option>
+              <option value="adj">Adjustment</option>
+              <option value="lnd">Loan given</option>
+              <option value="lnr">Loan repayment</option>
+              <option value="fcx">Foreign exchange</option>
+              <option value="aop">Account opening</option>
+              <option value="acl">Account closing</option>
+              <option value="spl">Split</option>
+              <option value="sal">Sale</option>
+            </select>
+          </div>
+
+          <!-- Date Range -->
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-1">Start Date</label>
+            <input type="date" [(ngModel)]="filterParams['start-date']" name="startDate" class="w-full bg-[#2a292a] border border-[#3d3c3d] text-white rounded-lg p-2">
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-1">End Date</label>
+            <input type="date" [(ngModel)]="filterParams['end-date']" name="endDate" class="w-full bg-[#2a292a] border border-[#3d3c3d] text-white rounded-lg p-2">
+          </div>
+
+          <!-- Sort Options -->
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-1">Sort By</label>
+            <select [(ngModel)]="filterParams['sort-by']" name="sortBy" class="w-full bg-[#2a292a] border border-[#3d3c3d] text-white rounded-lg p-2">
+              <option value="date">Date</option>
+              <option value="amount">Amount</option>
+              <option value="description">Description</option>
+              <option value="mcc">MCC</option>
+              <option value="kind">Transaction kind</option>
+              <option value="catcode">Category</option>
+              <option value="beneficiaryname">Beneficiary</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-1">Sort Order</label>
+            <select [(ngModel)]="filterParams['sort-order']" name="sortOrder" class="w-full bg-[#2a292a] border border-[#3d3c3d] text-white rounded-lg p-2">
+              <option value="Desc">Descending</option>
+              <option value="Asc">Ascending</option>
+            </select>
+          </div>
+
+          <div class="flex items-end">
+            <button type="submit" class="px-4 py-2 bg-[#4a3a6e] text-white rounded-lg hover:bg-[#5d4a85] transition-colors">
+              Apply Filters
+            </button>
+            <button type="button" (click)="resetFilters()" class="ml-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+              Reset
+            </button>
+          </div>
+        </form>
+      </div>
+    }
+
+    <!-- Transactions Table -->
+    @if (!loading && !error) {
+      <div class="bg-[#363536] rounded-lg shadow-sm overflow-hidden border border-[#2a292a]">
+        <!-- Table Header -->
+        <div class="px-6 py-4 border-b border-[#2a292a]">
+          <h2 class="text-lg font-semibold text-purple-400">
+            Transactions
+          </h2>
+        </div>
+
+        <!-- Table -->
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm">
+            <thead class="bg-[#2a292a]">
+            <tr>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">ID</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">DATE</th>
+              <th class="px-4 py-3 text-center text-xs font-medium text-gray-300 uppercase tracking-wider">DIR</th>
+              <th class="px-4 py-3 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">AMOUNT</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">BENEFICIARY</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">DESCRIPTION</th>
+              <th class="px-4 py-3 text-center text-xs font-medium text-gray-300 uppercase tracking-wider">CURRENCY</th>
+              <th class="px-4 py-3 text-center text-xs font-medium text-gray-300 uppercase tracking-wider">MCC</th>
+              <th class="px-4 py-3 text-center text-xs font-medium text-gray-300 uppercase tracking-wider">KIND</th>
+              <th class="px-4 py-3 text-center text-xs font-medium text-gray-300 uppercase tracking-wider">CATEGORY</th>
+              <th class="px-4 py-3 text-center text-xs font-medium text-gray-300 uppercase tracking-wider">SPLIT</th>
+            </tr>
+            </thead>
+            <tbody class="divide-y divide-[#2a292a]">
+              @for (transaction of pagedTransactions?.items; track transaction.id) {
+                <tr class="hover:bg-[#2a292a]">
+                  <td class="px-4 py-3 whitespace-nowrap text-sm font-mono text-white">{{ transaction.id }}</td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm text-white">{{ formatDate(transaction.date) }}</td>
+                  <td class="px-4 py-3 whitespace-nowrap text-center text-xl">
+                    <span [ngClass]="{
+                      'text-green-400': transaction.direction === 'c',
+                      'text-red-400': transaction.direction === 'd'
+                    }">
+                      {{ transaction.direction === 'c' ? '↑' : '↓' }}
+                    </span>
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap text-right text-sm font-medium text-white">
+                    {{ formatAmount(transaction.amount) }}
+                  </td>
+                  <td class="px-4 py-3 text-sm text-white max-w-[150px] truncate">{{ transaction.beneficiaryName || '-' }}</td>
+                  <td class="px-4 py-3 text-sm text-white max-w-[200px] truncate">{{ transaction.description || '-' }}</td>
+                  <td class="px-4 py-3 whitespace-nowrap text-center text-sm text-white">{{ transaction.currency }}</td>
+                  <td class="px-4 py-3 whitespace-nowrap text-center text-sm text-white">{{ transaction.mcc || '-' }}</td>
+                  <td class="px-4 py-3 whitespace-nowrap text-center">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border"
+                          [ngClass]="kindClasses(transaction.kind)">
+                      {{ getTransactionTypeLabel(transaction.kind) }}
+                    </span>
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap text-center text-sm text-white">
+                    @if (transaction.catCode) {
+                      {{ transaction.catCode }}
+                    } @else {
+                      <button (click)="openCategoryDialog(transaction)"
+                              class="px-2 py-1 bg-purple-600 text-white rounded hover:bg-purple-700 text-xs">
+                        Add Category
+                      </button>
+                    }
+                  <td class="px-4 py-3 text-center text-sm text-white">
+                    @if (transaction.splits.length > 0) {
+                      <i class="fas fa-code-branch text-purple-400"
+                         title="Split transaction ({{transaction.splits.length}} parts)"></i>
+                    } @else {
+                      <span>-</span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty State -->
+        @if (pagedTransactions?.items?.length === 0) {
+          <div class="text-center py-16">
+            <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+            </svg>
+            <h3 class="mt-4 text-lg font-semibold text-white">No transactions</h3>
+            <p class="mt-2 text-sm text-gray-300">There are no transactions right now.</p>
+          </div>
+        }
+      </div>
+
+      <!-- Pagination -->
+      @if (pagedTransactions && pagedTransactions.totalPages > 1) {
+        <div class="flex justify-center mt-8">
+          <nav class="flex items-center space-x-2">
+            <!-- Previous Button -->
+            <button (click)="previousPage()"
+                    [disabled]="currentPage <= 1"
+                    [ngClass]="{
+                      'bg-[#2a292a] text-gray-400 cursor-not-allowed': currentPage <= 1,
+                      'bg-[#2a292a] text-white hover:bg-[#4a3a6e] border-[#2a292a]': currentPage > 1
+                    }"
+                    class="px-3 py-2 border rounded-lg text-sm font-medium transition-colors duration-200">
+              <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"/>
+              </svg>
+            </button>
+
+            <!-- Page Numbers -->
+            @for (page of getVisiblePages(); track page) {
+              @if (page === -1) {
+                <span class="px-3 py-2 text-gray-400">...</span>
+              } @else {
+                <button (click)="goToPage(page)"
+                        [ngClass]="{
+                          'bg-[#4a3a6e] text-white border-[#4a3a6e]': page === currentPage,
+                          'bg-[#2a292a] text-white hover:bg-[#4a3a6e] border-[#2a292a]': page !== currentPage
+                        }"
+                        class="px-4 py-2 border rounded-lg text-sm font-medium transition-colors duration-200">
+                  {{page}}
+                </button>
+              }
+            }
+
+            <!-- Next Button -->
+            <button (click)="nextPage()"
+                    [disabled]="currentPage >= pagedTransactions.totalPages"
+                    [ngClass]="{
+                      'bg-[#2a292a] text-gray-400 cursor-not-allowed': currentPage >= pagedTransactions.totalPages,
+                      'bg-[#2a292a] text-white hover:bg-[#4a3a6e] border-[#2a292a]': currentPage < pagedTransactions.totalPages
+                    }"
+                    class="px-3 py-2 border rounded-lg text-sm font-medium transition-colors duration-200">
+              <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+              </svg>
+            </button>
+          </nav>
+        </div>
+      }
+    }
+  </div>
+</div>
+@if (showCategoryDialog) {
+  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-[#363536] rounded-lg p-6 w-96 border border-[#2a292a]">
+      <h3 class="text-lg font-semibold text-purple-400 mb-4">Select Category</h3>
+
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-300 mb-1">Main Category</label>
+        <select [(ngModel)]="selectedMainCategory" (change)="loadSubCategories()"
+                class="w-full bg-[#2a292a] border border-[#3d3c3d] text-white rounded-lg p-2">
+          <option [value]="null">Select Category</option>
+          @for (category of mainCategories; track category.code) {
+            <option [value]="category.code">{{category.name}} ({{category.code}})</option>
+          }
+        </select>
+      </div>
+
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-300 mb-1">Subcategory</label>
+        <select [(ngModel)]="selectedSubCategory"
+                class="w-full bg-[#2a292a] border border-[#3d3c3d] text-white rounded-lg p-2"
+                [disabled]="!subCategories.length">
+          <option [value]="null">No subcategory</option>
+          @for (category of subCategories; track category.code) {
+            <option [value]="category.code">{{category.name}} ({{category.code}})</option>
+          }
+        </select>
+      </div>
+
+      <div class="flex justify-end space-x-2">
+        <button (click)="showCategoryDialog = false"
+                class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">
+          Cancel
+        </button>
+        <button (click)="assignCategory()"
+                class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                [disabled]="!selectedMainCategory">
+          OK
+        </button>
+      </div>
+    </div>
+  </div>
+}

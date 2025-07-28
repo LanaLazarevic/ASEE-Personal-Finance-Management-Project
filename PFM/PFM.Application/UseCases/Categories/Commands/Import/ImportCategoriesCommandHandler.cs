@@ -36,8 +36,18 @@ namespace PFM.Application.UseCases.Catagories.Commands.Import
                          && Regex.IsMatch(r.Name, "[a-zA-Z]"))
                 .ToList();
 
-            //if (!valid.Any())
-                
+            if (!valid.Any())
+                return OperationResult.Fail(
+                    400,
+                    new List<ValidationError>
+                    {
+                        new ValidationError
+                        {
+                            Tag = "file",
+                            Message = "File doesnt contain a signle valid row.",
+                            Error = "invalid-format"
+                        }
+                    });
 
             try
             {

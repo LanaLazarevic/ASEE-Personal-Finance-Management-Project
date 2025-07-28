@@ -10,10 +10,10 @@ namespace PFM.Application.UseCases.Result
     public class ValidationError : Error
     {
         [JsonPropertyName("tag")]
-        public string Tag { get; set; }
+        public required string Tag { get; set; }
         [JsonPropertyName("error")]
-        public string Error { get; set; }
+        public required string Error { get; set; }
         [JsonPropertyName("message")]
-        public string Message { get; set; }
+        public required string Message { get; set; }
     }
 }

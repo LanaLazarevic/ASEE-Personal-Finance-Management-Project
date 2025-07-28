@@ -34,7 +34,7 @@ builder.Services
     })
     .AddJsonOptions(o => { /* ... */ })
     .AddXmlSerializerFormatters();
-builder.Services.AddCors(options => options.AddPolicy( "cors", policy => policy.WithOrigins(Environment.GetEnvironmentVariable("FRONTEND_URL")??"")
+builder.Services.AddCors(options => options.AddPolicy( "cors", policy => policy.WithOrigins(Environment.GetEnvironmentVariable("FRONTEND_URL")??"http://localhost:4200")
                                                                                                         .AllowAnyHeader()
                                                                                                         .AllowAnyMethod()));
 builder.Services.AddEndpointsApiExplorer();

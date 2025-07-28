@@ -10,6 +10,6 @@ namespace PFM.Application.UseCases.Result
     public class SpendingsGroupDto
     {
         [JsonPropertyName("groups")]
-        public List<SpendingGroupDto> Groups { get; set; }
+        public required List<SpendingGroupDto> Groups { get; set; }
     }
 }

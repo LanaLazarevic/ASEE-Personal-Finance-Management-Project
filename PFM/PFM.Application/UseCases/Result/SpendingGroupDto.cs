@@ -10,10 +10,10 @@ namespace PFM.Application.UseCases.Result
     public class SpendingGroupDto
     {
         [JsonPropertyName("catcode")]
-        public string CatCode { get; set; }
+        public required string CatCode { get; set; }
         [JsonPropertyName("amount")]
-        public double Amount { get; set; }
+        public required double Amount { get; set; }
         [JsonPropertyName("count")]
-        public int Count { get; set; }
+        public required int Count { get; set; }
     }
 }

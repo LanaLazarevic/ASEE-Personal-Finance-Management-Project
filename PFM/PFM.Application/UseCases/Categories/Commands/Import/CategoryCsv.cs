@@ -10,12 +10,12 @@ namespace PFM.Application.UseCases.Catagories.Commands.Import
     public class CategoryCsv
     {
         [Name("code")]
-        public string Code { get; set; }
+        public required string Code { get; set; }
 
         [Name("parent-code")]
-        public string ParentCode { get; set; }
+        public string? ParentCode { get; set; }
 
         [Name("name")]
-        public string Name { get; set; }
+        public required string Name { get; set; }
     }
 }

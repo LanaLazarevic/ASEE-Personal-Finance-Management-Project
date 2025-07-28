@@ -10,8 +10,8 @@ namespace PFM.Domain.Dtos
     public class SplitItemDto
     {
         [JsonPropertyName("catcode")]
-        public string CatCode { get; set; }
+        public required string CatCode { get; set; }
         [JsonPropertyName("amount")]
-        public double Amount { get; set; }
+        public required double Amount { get; set; }
     }
 }

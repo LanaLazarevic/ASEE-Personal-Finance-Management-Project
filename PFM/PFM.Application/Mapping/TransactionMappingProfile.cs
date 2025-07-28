@@ -15,6 +15,7 @@ namespace PFM.Application.Mapping
         {
             CreateMap<Transaction, TransactionDto>();
             CreateMap<Split, SplitItemDto>();
+            CreateMap<Category, CategoryDto>();
         }
     }
 }
