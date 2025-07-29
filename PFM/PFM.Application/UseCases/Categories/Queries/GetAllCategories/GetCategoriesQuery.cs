@@ -16,7 +16,7 @@ namespace PFM.Application.UseCases.Categories.Queries.CetAllCategories
 {
     public class GetCatagoriesQuery : IRequest<OperationResult<List<CategoryDto>>>
     {
-        [FromQuery(Name = "parent-code")]
+        [FromQuery(Name = "parent-id")]
         public string? ParentCode { get; set; }
     }
 }

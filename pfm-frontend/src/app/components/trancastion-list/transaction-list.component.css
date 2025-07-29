@@ -75,3 +75,14 @@ tr:hover {
   background-color: hsl(263, 70%, 50%) !important;
   color: white !important;
 }
+
+/* Make table container wider */
+.max-w-6xl {
+  max-width: 90rem !important; /* Increased from 72rem */
+}
+
+/* Table styling */
+table {
+  width: 100%;
+  min-width: 1200px; /* Force wider table */
+}
