@@ -1,8 +1,7 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Configuration;
 using PFM.Application.Interfaces;
-using PFM.Application.UseCases.Resault;
-using PFM.Application.UseCases.Result;
+using PFM.Application.Result;
 using PFM.Application.UseCases.Transaction.Commands.AutoCategorization;
 using PFM.Domain.Dtos;
 

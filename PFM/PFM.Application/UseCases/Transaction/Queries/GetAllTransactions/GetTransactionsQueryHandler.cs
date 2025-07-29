@@ -1,8 +1,8 @@
-﻿using FluentValidation;
+﻿using AutoMapper;
+using FluentValidation;
 using MediatR;
 using NPOI.SS.Formula.Functions;
-using PFM.Application.UseCases.Resault;
-using PFM.Application.UseCases.Result;
+using PFM.Application.Result;
 using PFM.Domain.Dtos;
 using PFM.Domain.Enums;
 using PFM.Domain.Interfaces;
@@ -19,9 +19,12 @@ namespace PFM.Application.UseCases.Transaction.Queries.GetAllTransactions
     {
         private readonly IUnitOfWork _repository;
 
-        public GetCategoriesQueryHandler(IUnitOfWork repository)
+        private readonly IMapper _mapper;
+
+        public GetCategoriesQueryHandler(IUnitOfWork repository, IMapper mapper)
         {
             _repository = repository;
+            _mapper = mapper;
         }
 
         public async Task<OperationResult<PagedList<TransactionDto>>> Handle(GetTransactionsQuery request, CancellationToken cancellationToken)
@@ -81,8 +84,18 @@ namespace PFM.Application.UseCases.Transaction.Queries.GetAllTransactions
                     List<ValidationError> errors = new List<ValidationError> { error };
                     return OperationResult<PagedList<TransactionDto>>.Fail(440, errors);
                 }
-
-                return OperationResult<PagedList<TransactionDto>>.Success(transactions, 200);
+                var transactionDtos = _mapper.Map<List<TransactionDto>>(transactions.Items);
+                var pagedList = new PagedList<TransactionDto>()
+                {
+                    Items = transactionDtos,
+                    TotalCount = transactions.TotalCount,
+                    PageSize = transactions.PageSize,
+                    Page = transactions.Page,
+                    SortBy = transactions.SortBy,
+                    SortOrderd = transactions.SortOrderd,
+                    TotalPages = transactions.TotalPages
+                };
+                return OperationResult<PagedList<TransactionDto>>.Success(pagedList, 200);
             }
             catch (TimeoutException tex)
             {

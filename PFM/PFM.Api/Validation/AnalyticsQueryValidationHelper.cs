@@ -1,5 +1,5 @@
-﻿using PFM.Application.UseCases.Analytics.Queries.GetSpendingAnalytics;
-using PFM.Application.UseCases.Result;
+﻿using PFM.Application.Result;
+using PFM.Application.UseCases.Analytics.Queries.GetSpendingAnalytics;
 using PFM.Domain.Enums;
 
 namespace PFM.Api.Validation

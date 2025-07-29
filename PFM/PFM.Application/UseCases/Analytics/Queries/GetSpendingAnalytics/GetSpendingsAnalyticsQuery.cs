@@ -1,7 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using PFM.Application.UseCases.Resault;
-using PFM.Application.UseCases.Result;
+using PFM.Application.Result;
 using PFM.Domain.Enums;
 using System;
 using System.Collections.Generic;

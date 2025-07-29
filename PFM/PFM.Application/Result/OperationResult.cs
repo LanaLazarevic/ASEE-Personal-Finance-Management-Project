@@ -1,5 +1,4 @@
 ﻿using MediatR;
-using PFM.Application.UseCases.Result;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +6,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace PFM.Application.UseCases.Resault
+namespace PFM.Application.Result
 {
     public class OperationResult<T>
     {
@@ -21,7 +20,7 @@ namespace PFM.Application.UseCases.Resault
             IsSuccess = success;
             Value = value;
             this.code = code;
-            this.Error = erorrs;
+            Error = erorrs;
         }
 
 

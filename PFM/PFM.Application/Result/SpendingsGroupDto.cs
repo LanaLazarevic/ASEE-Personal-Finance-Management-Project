@@ -5,11 +5,11 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace PFM.Application.UseCases.Result
+namespace PFM.Application.Result
 {
-    public class ServerError : Error
+    public class SpendingsGroupDto
     {
-        [JsonPropertyName("message")]
-        public string Message { get; set; }
+        [JsonPropertyName("groups")]
+        public required List<SpendingGroupDto> Groups { get; set; }
     }
 }

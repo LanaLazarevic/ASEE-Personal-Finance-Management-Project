@@ -1,8 +1,8 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using PFM.Api.Validation;
+using PFM.Application.Result;
 using PFM.Application.UseCases.Analytics.Queries.GetSpendingAnalytics;
-using PFM.Application.UseCases.Result;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace PFM.Api.Controllers

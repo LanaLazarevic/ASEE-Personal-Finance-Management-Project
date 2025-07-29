@@ -1,4 +1,4 @@
-﻿using PFM.Application.UseCases.Result;
+﻿using PFM.Application.Result;
 using PFM.Domain.Dtos;
 
 namespace PFM.Api.Validation
@@ -9,13 +9,13 @@ namespace PFM.Api.Validation
         {
             var errors = new List<ValidationError>();
 
-            if (splits == null || !splits.Any())
+            if (splits == null || splits.Count()<2)
             {
                 errors.Add(new ValidationError
                 {
                     Tag = "splits",
                     Error = "required",
-                    Message = "At least one split item is required."
+                    Message = "At least two split items are required."
                 });
                 return errors;
             }

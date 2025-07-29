@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PFM.Application.UseCases.Result
+namespace PFM.Application.Result
 {
     public class GetAllTransactionsResponse
     {

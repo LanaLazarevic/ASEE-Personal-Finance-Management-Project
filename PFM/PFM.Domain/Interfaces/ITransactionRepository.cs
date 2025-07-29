@@ -11,7 +11,7 @@ namespace PFM.Domain.Interfaces
     public interface ITransactionRepository
     {
         void Add(Transaction transaction);
-        Task<PagedList<TransactionDto>> GetTransactionsAsync(TransactionQuerySpecification specification);
+        Task<PagedList<Transaction>> GetTransactionsAsync(TransactionQuerySpecification specification);
         Task<bool> ExistsAsync(string id, CancellationToken ct = default);
         Task<List<string>> GetExistingIdsAsync(List<string> ids, CancellationToken ct = default);
         Task<Transaction?> GetByIdAsync(string id, CancellationToken ct = default);

@@ -1,4 +1,4 @@
-﻿using PFM.Application.UseCases.Result;
+﻿using PFM.Application.Result;
 using PFM.Application.UseCases.Transaction.Queries.GetAllTransactions;
 using PFM.Domain.Dtos;
 using PFM.Domain.Enums;

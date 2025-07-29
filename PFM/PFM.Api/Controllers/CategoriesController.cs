@@ -2,9 +2,9 @@
 using CsvHelper.Configuration;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using PFM.Application.Result;
 using PFM.Application.UseCases.Catagories.Commands.Import;
 using PFM.Application.UseCases.Categories.Queries.CetAllCategories;
-using PFM.Application.UseCases.Result;
 using PFM.Application.UseCases.Transaction.Commands.AutoCategorization;
 using PFM.Application.UseCases.Transaction.Commands.Import;
 using PFM.Domain.Entities;

@@ -1,9 +1,9 @@
-﻿using FluentValidation;
+﻿using AutoMapper;
+using FluentValidation;
 using MediatR;
 using NPOI.SS.Formula.Functions;
+using PFM.Application.Result;
 using PFM.Application.UseCases.Categories.Queries.CetAllCategories;
-using PFM.Application.UseCases.Resault;
-using PFM.Application.UseCases.Result;
 using PFM.Domain.Dtos;
 using PFM.Domain.Entities;
 using PFM.Domain.Enums;
@@ -21,9 +21,12 @@ namespace PFM.Application.UseCases.Catagories.Queries.GetAllCategories
     {
         private readonly IUnitOfWork _uow;
 
-        public GetCategoriesQueryHandler(IUnitOfWork repository)
+        private readonly IMapper _mapper;
+
+        public GetCategoriesQueryHandler(IUnitOfWork repository, IMapper mapper )
         {
             _uow = repository;
+            _mapper = mapper;
         }
 
         public async Task<OperationResult<List<CategoryDto>>> Handle(GetCatagoriesQuery request, CancellationToken cancellationToken)
@@ -34,7 +37,8 @@ namespace PFM.Application.UseCases.Catagories.Queries.GetAllCategories
                 if(string.IsNullOrWhiteSpace(request.ParentCode))
                 {
                     var categories = await _uow.Categories.GetAll(null,cancellationToken);
-                    return OperationResult<List<CategoryDto>>.Success(categories, 200);
+                    var categoryDtos = _mapper.Map<List<CategoryDto>>(categories);
+                    return OperationResult<List<CategoryDto>>.Success(categoryDtos, 200);
                 }
                 else
                 {
@@ -57,7 +61,8 @@ namespace PFM.Application.UseCases.Catagories.Queries.GetAllCategories
 
 
                     var categories = await _uow.Categories.GetAll(cat.Code,cancellationToken);
-                    return OperationResult<List<CategoryDto>>.Success(categories, 200);
+                    var categoryDtos = _mapper.Map<List<CategoryDto>>(categories);
+                    return OperationResult<List<CategoryDto>>.Success(categoryDtos, 200);
                 }
                    
             }

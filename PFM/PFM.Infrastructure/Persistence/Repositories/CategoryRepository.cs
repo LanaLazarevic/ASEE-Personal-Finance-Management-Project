@@ -16,13 +16,11 @@ namespace PFM.Infrastructure.Persistence.Repositories
     public class CategoryRepository : ICategoryRepository
     {
         private readonly PFMDbContext _ctx;
-        private readonly IConfigurationProvider _mapperConfig;
 
 
-        public CategoryRepository(PFMDbContext ctx, IConfigurationProvider configurationProvider)
+        public CategoryRepository(PFMDbContext ctx)
         {
             _ctx = ctx;
-            _mapperConfig = configurationProvider;
         }
         public void Add(Category category)
         {
@@ -36,16 +34,12 @@ namespace PFM.Infrastructure.Persistence.Repositories
                          .ToListAsync(ct);
         }
 
-        public async Task<List<CategoryDto>> GetAll(string? code, CancellationToken ct = default)
+        public async Task<List<Category>> GetAll(string? code, CancellationToken ct = default)
         {
             if (string.IsNullOrWhiteSpace(code))
-                return await _ctx.Categories.
-                ProjectTo<CategoryDto>(_mapperConfig)
-                         .ToListAsync(ct);
+                return await _ctx.Categories.ToListAsync(ct);
             else
-                return await _ctx.Categories
-                         .Where(c => c.ParentCode == code)
-                         .ProjectTo<CategoryDto>(_mapperConfig)
+                return await _ctx.Categories.Where(c => c.ParentCode == code)
                          .ToListAsync(ct);
         }
     }

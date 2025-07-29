@@ -4,7 +4,7 @@ using NPOI.SS.UserModel;
 using Org.BouncyCastle.Ocsp;
 using PFM.Api.Request;
 using PFM.Api.Validation;
-using PFM.Application.UseCases.Result;
+using PFM.Application.Result;
 using PFM.Application.UseCases.Transaction.Commands.AutoCategorization;
 using PFM.Application.UseCases.Transaction.Commands.CategorizeTransaction;
 using PFM.Application.UseCases.Transaction.Commands.Import;

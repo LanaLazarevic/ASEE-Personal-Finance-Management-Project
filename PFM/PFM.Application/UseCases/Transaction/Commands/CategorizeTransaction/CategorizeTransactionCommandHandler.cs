@@ -1,6 +1,5 @@
 ﻿using MediatR;
-using PFM.Application.UseCases.Resault;
-using PFM.Application.UseCases.Result;
+using PFM.Application.Result;
 using PFM.Domain.Interfaces;
 using System;
 using System.Collections.Generic;

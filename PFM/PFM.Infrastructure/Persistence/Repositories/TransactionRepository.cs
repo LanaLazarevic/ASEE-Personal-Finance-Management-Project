@@ -16,19 +16,17 @@ namespace PFM.Infrastructure.Persistence.Repositories
     public class TransactionRepository : ITransactionRepository
     {
         private readonly PFMDbContext _ctx;
-        private readonly IConfigurationProvider _mapperConfig;
 
-        public TransactionRepository(PFMDbContext ctx, IMapper mapper)
+        public TransactionRepository(PFMDbContext ctx)
         {
             _ctx = ctx;
-            _mapperConfig = mapper.ConfigurationProvider;
         }
         public void Add(Transaction transaction)
         {
             _ctx.Transactions.Add(transaction);
         }
 
-        public async Task<PagedList<TransactionDto>> GetTransactionsAsync(TransactionQuerySpecification spec)
+        public async Task<PagedList<Transaction>> GetTransactionsAsync(TransactionQuerySpecification spec)
         {
             var query = _ctx.Transactions.AsQueryable();
 
@@ -41,15 +39,6 @@ namespace PFM.Infrastructure.Persistence.Repositories
             if (spec.Kind != null && spec.Kind.Any())
                 query = query.Where(t => spec.Kind.Contains(t.Kind));
 
-            /* query = spec.SortBy.ToLower() switch
-             {
-                 "amount" => spec.SortOrder == SortOrder.Asc
-                     ? query.OrderBy(t => t.Amount)
-                     : query.OrderByDescending(t => t.Amount),
-                 _ => spec.SortOrder == SortOrder.Asc
-                     ? query.OrderBy(t => t.Date)
-                     : query.OrderByDescending(t => t.Date)
-             };*/
 
             query = spec.SortBy.ToLower() switch
             {
@@ -103,10 +92,9 @@ namespace PFM.Infrastructure.Persistence.Repositories
             var items = await query
                 .Skip((spec.Page - 1) * spec.PageSize)
                 .Take(spec.PageSize)
-                .ProjectTo<TransactionDto>(_mapperConfig)
                 .ToListAsync();
 
-            return new PagedList<TransactionDto>()
+            return new PagedList<Transaction>()
             {
                 Items = items,
                 TotalCount = totalCount,

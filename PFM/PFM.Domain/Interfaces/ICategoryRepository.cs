@@ -12,7 +12,7 @@ namespace PFM.Domain.Interfaces
     {
         Task<List<Category>> GetByCodesAsync(IEnumerable<string> codes, CancellationToken ct = default);
 
-        Task<List<CategoryDto>> GetAll(string? code, CancellationToken ct = default);
+        Task<List<Category>> GetAll(string? code, CancellationToken ct = default);
 
         void Add(Category category);
     }

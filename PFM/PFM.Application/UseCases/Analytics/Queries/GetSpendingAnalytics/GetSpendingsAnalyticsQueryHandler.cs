@@ -1,7 +1,6 @@
 ﻿using FluentValidation;
 using MediatR;
-using PFM.Application.UseCases.Resault;
-using PFM.Application.UseCases.Result;
+using PFM.Application.Result;
 using PFM.Domain.Dtos;
 using PFM.Domain.Enums;
 using PFM.Domain.Interfaces;
@@ -71,19 +70,7 @@ namespace PFM.Application.UseCases.Analytics.Queries.GetSpendingAnalytics
                         } ]);
 
 
-            /*var groupsQuery = string.IsNullOrWhiteSpace(request.CatCode)
-                ? flat.GroupBy(x => string.IsNullOrEmpty(x.Parent) ? x.Cat : x.Parent)
-                : flat.Where(x => x.Parent == request.CatCode)
-                      .GroupBy(x => x.Cat);
-
-            var groups = groupsQuery
-                .Select(g => new SpendingGroupDto
-                {
-                    CatCode = g.Key,
-                    Amount = g.Sum(x => x.Amount),
-                    Count = g.Count()
-                })
-                .ToList();*/
+           
             List<SpendingGroupDto> groups;
 
             if (string.IsNullOrWhiteSpace(request.CatCode))
