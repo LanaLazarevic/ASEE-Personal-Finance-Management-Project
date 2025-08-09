@@ -28,7 +28,7 @@ namespace PFM.Infrastructure.Persistence.Repositories
 
         public async Task<PagedList<Transaction>> GetTransactionsAsync(TransactionQuerySpecification spec)
         {
-            var query = _ctx.Transactions.AsQueryable();
+            var query = _ctx.Transactions.Include(t=>t.Splits).AsQueryable();
 
             if (spec.StartDate.HasValue)
                 query = query.Where(t => t.Date >= spec.StartDate.Value);
